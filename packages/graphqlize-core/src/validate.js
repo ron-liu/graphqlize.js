@@ -24,7 +24,8 @@ const connectionOptionDialectIsRequired = compose(
 const validators = [
 	optionRequired,
 	schemaTypesIsRequired,
-	connectionOptionDialectIsRequired
+	connectionOptionDialectIsRequired,
+	//todo: only persistent type's field can set @relation directive
 ]
 
 export default (option: GraphqlizeOption) =>
