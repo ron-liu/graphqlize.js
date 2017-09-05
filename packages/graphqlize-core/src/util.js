@@ -1,3 +1,6 @@
+import task from 'folktale/concurrency/task'
+import Sequelize from 'sequelize'
+
 export {
 	not, converge, filter, applySpec, evolve, lensProp, over, toPairs, fromPairs, lensIndex,
 	contains, join, when, prop, equals, find, tap, map, path, range, inc, dec,
@@ -23,6 +26,7 @@ export const Box = x =>
 	inspect: () => `Box(${x})`
 })
 
+
 export const printJson = x => console.log(JSON.stringify(x, null, '\t'))
 
 export const SequelizeJsonType = {
@@ -41,3 +45,8 @@ export const SequelizeJsonType = {
 		}
 	}
 }
+
+export const promiseToTask = (p: Promise<mixed>) =>
+	task(({reject, resolve}) => p.then(resolve).catch(reject))
+
+export {of as taskOf} from 'folktale/concurrency/task'

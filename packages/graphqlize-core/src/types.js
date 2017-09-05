@@ -1,4 +1,5 @@
 import type {Fn4, Fn1} from './basic-types'
+import Sequelize from 'sequelize'
 
 export type Schema = {
 	types: Array<string>,
@@ -64,3 +65,4 @@ export type Relationship = {
 		as?: string
 	}
 }
+export type Db = typeof Sequelize
