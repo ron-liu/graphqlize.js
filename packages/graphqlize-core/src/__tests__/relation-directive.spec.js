@@ -13,7 +13,7 @@ const types = [
 		}`
 ]
 
-test('', () => {
+test('n-1 should work', () => {
 	const relationships = schemaToAst({types})
 		.chain(extractRelationshipFromAst)
 		.fold(
@@ -26,4 +26,6 @@ test('', () => {
 			])
 		)
 })
+
+//todo: 1-n 1-1 n-n tests, and other edge cases tests
 

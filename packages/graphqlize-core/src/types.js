@@ -25,7 +25,7 @@ type CustomScalar = {
 	resolver?: mixed
 }
 
-type CustomScalars = {[id: string]: CustomScalar}
+export type CustomScalars = {[id: string]: CustomScalar}
 
 type Obj = mixed
 type Args = mixed
@@ -52,3 +52,15 @@ type ExecutableSchema = mixed // Task<executableSchema>
 export type Graphqlize = Fn1<GraphqlizeOption,ExecutableSchema>
 
 export type Ast = mixed
+export type Relationship = {
+	from: {
+		multi: boolean,
+		model: string,
+		as: string
+	},
+	to: {
+		multi: boolean,
+		model: string,
+		as?: string
+	}
+}
