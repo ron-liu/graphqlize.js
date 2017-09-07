@@ -1,5 +1,5 @@
 import {schemaToAst} from '../ast'
-import {extractRelationshipFromAst} from '../relationship'
+import {getRelationshipFromAst} from '../relationship'
 
 const types = [
 	`type Post {
@@ -15,7 +15,7 @@ const types = [
 
 test('n-1 should work', () => {
 	const relationships = schemaToAst({types})
-		.chain(extractRelationshipFromAst)
+		.chain(getRelationshipFromAst)
 		.fold(
 			() => {throw new Error('should not have errors')},
 			x => expect(x).toEqual([

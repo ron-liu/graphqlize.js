@@ -42,12 +42,14 @@ type WholeResolvers = {
 
 type Handler = Fn1<mixed, void>
 type Handlers = {[id: string]: Handler}
+type Core = mixed
 export type GraphqlizeOption = {
 	schema: Schema,
 	connection: Connection,
 	customerScalars?: CustomScalars,
 	resolvers?: WholeResolvers,
-	handlers?: Handlers
+	handlers?: Handlers,
+	core: Core
 }
 type ExecutableSchema = mixed // Task<executableSchema>
 export type Graphqlize = Fn1<GraphqlizeOption,ExecutableSchema>

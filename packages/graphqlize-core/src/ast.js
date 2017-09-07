@@ -1,12 +1,11 @@
 import type {Fn1} from './basic-types'
-import type {Schema, Ast} from './types'
-import {when, pipe, prop, isArray, join} from './util'
+import type {Schema, Ast, GraphqlizeOption} from './types'
+import {when, pipe, prop, isArray, join, path, taskTry} from './util'
 import {parse} from 'graphql'
-import Result from 'folktale/result'
 
-// Schema -> Result Ast
-export const schemaToAst: Fn1<Schema, Ast> = pipe(
-	prop('types'),
+// Schema -> Task Ast
+export const getAst: Fn1<GraphqlizeOption, Ast> = pipe(
+	path(['schema','types']),
 	when(isArray, join('\n')),
-	x => Result.try(() => parse(x, {noLocation: true}))
+	x => taskTry(() => parse(x, {noLocation: true}))
 )

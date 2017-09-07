@@ -9,6 +9,9 @@ export const initSequelize : Fn1<GraphqlizeOption, Db> = pipe(
 	x => new Sequelize(...x)
 )
 
+export const registerGetDbService : CurriedFn2<GraphqlizeOption, Db, void> = {
+}
+
 // GraphqlizeOption -> Db -> Task
 export const sync = curry((option, connector) => pipe(
 	ifElse(
@@ -18,3 +21,5 @@ export const sync = curry((option, connector) => pipe(
 	),
 	map(K(true))
 )(option))
+
+

@@ -1,6 +1,7 @@
 import {Success, Failure, collect} from 'folktale/validation'
+import Result from 'folktale/result'
 import type {GraphqlizeOption} from './types'
-import {path, I, ifElse, then, concat, compose, tap, K} from "./util";
+import {path, I, ifElse, then, concat, compose, tap, K, validationToTask} from "./util";
 import {List} from 'immutable-ext'
 
 const required = name => ifElse(
@@ -21,15 +22,24 @@ const connectionOptionDialectIsRequired = compose(
 	path(['connection', 'option', 'dialect'])
 )
 
+const coreOptionIsRequired = compose(
+	required('core'),
+	path(['core'])
+)
+
 const validators = [
 	optionRequired,
 	schemaTypesIsRequired,
 	connectionOptionDialectIsRequired,
+	coreOptionIsRequired
 	//todo: only persistent type's field can set @relation directive
 ]
 
 export default (option: GraphqlizeOption) =>
-	List(validators)
-	.ap(List.of(option))
-	.reduce(concat, Success())
-	.map(K(option))
+	validationToTask(
+		List(validators)
+		.ap(List.of(option))
+		.reduce(concat, Success())
+		.map(K(option))
+	)
+	

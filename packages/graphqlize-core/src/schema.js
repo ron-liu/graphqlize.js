@@ -1,6 +1,6 @@
 import type {GraphqlizeOption, Schema} from './types'
 import type {Fn1} from 'basic-types'
-import {mergeWith, over, concat} from "./util";
+import {mergeWith, over, concat, lensProp} from "./util";
 
 const systemSchema : Schema = {
 	types: [
@@ -19,4 +19,4 @@ const systemSchema : Schema = {
 }
 
 export const mergeSystemSchema : Fn1<GraphqlizeOption, GraphqlizeOption> =
-	over('schema', mergeWith(concat, systemSchema))
+	over(lensProp('schema'), mergeWith(concat, systemSchema))

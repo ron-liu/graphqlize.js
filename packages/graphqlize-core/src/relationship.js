@@ -3,11 +3,13 @@ import type {Fn1, CurriedFn2} from './basic-types'
 import {
 	__, pipe, propEq, map, ifElse, I, concat, converge, of2, K, flatten, path, assoc, propSatisfies, lensProp,
 	filter, both, either, pathEq, isNil, not, applySpec, prop, tap, curry, when, equals, printJson, any, pick, over,
-	all, contains, forEach, find, groupWith, gt, head, length, last, reject, reduce, Box, pathSatisfies, of, isEmpty
+	all, contains, forEach, find, groupWith, gt, head, length, last, reject, reduce, Box, pathSatisfies, of, isEmpty,
+	taskOf
 } from './util'
 import {TYPE_KIND} from './constants'
 import {Failure, Success, collect} from 'folktale/validation'
 import Result from 'folktale/result'
+import {validationToTask} from "./util/hkt";
 
 const getBaseTypeFromField = pipe(
 	prop('type'),
@@ -55,6 +57,7 @@ const filterTypesFieldsWithRelationDirective = astTypes => astTypes
 // AstTypes -> Failure [error] | Success [Field]
 const extractTypeFields = astType => Result.of(astType) // Result [AstType]
 	.map(prop('fields'))    // Result [AstField]
+	.map(tap(x=>console.log(x, 877)))
 	.map(map(applySpec({      // [Field]
 			objectName: K(astType.name),
 			name: path(['name', 'value']),
@@ -77,7 +80,7 @@ const extractTypeFields = astType => Result.of(astType) // Result [AstType]
 
 const extractTypesFields = astTypes => Result.of(astTypes)
 	.map(map(extractTypeFields))
-	.chain(collect)
+	.chain(reduce(concat, Success([])))
 
 const generateRelationship = applySpec({
 		from: applySpec({
@@ -101,10 +104,9 @@ const generateRelationship = applySpec({
 	})
 
 // Ast -> Validation.Failure | Result.Ok relationships
-export const extractRelationshipFromAst = ast => Result.of(ast) // Ok ast
+export const getRelationshipFromAst = ast => taskOf(ast) // Ok ast
 	.map(getPersistentTypes)    // Ok [AstType]
 	.map(filterTypesFieldsWithRelationDirective) // Ok [AstType]
-	.chain(extractTypesFields)  // Failure [error] | Success [Field]
+	.chain(pipe(extractTypesFields, validationToTask))  // Failure [error] | Success [Field]
 	.map(groupWith((a, b) => a.relationName === b.relationName)) // Failure [error] | Success [ [Field, Field] ]
-	.map(tap(printJson))
 	.map(map(generateRelationship))
