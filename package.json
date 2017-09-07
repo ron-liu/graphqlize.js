@@ -1,5 +1,8 @@
 {
 	"devDependencies": {
 		"lerna": "^2.1.1"
+	},
+	"scripts": {
+		"loc": "git ls-files | grep 'js$' | xargs wc -l"
 	}
 }

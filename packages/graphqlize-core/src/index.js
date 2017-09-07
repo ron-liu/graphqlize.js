@@ -1,5 +1,5 @@
 import type {Graphqlize} from './types'
-import {taskDo} from './util'
+import {taskDo, taskOf} from './util'
 import validate from './validate'
 import {mergeSystemSchema} from './schema'
 import {getAst} from './ast'
@@ -13,7 +13,7 @@ const graphqlize : Graphqlize = async (option = {}) => {
 		const validatedOption = yield validate(option)
 			.map(mergeSystemSchema)
 			.map(mergeOptionWithBuiltInScalars)
-		const db = initSequelize(validatedOption)
+		const db = yield initSequelize(validatedOption)
 		const ast = yield getAst(validatedOption)
 		return  getRelationshipFromAst(ast)
 	})
