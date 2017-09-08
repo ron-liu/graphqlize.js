@@ -3,6 +3,9 @@ import Result from 'folktale/result'
 import type {GraphqlizeOption} from './types'
 import {path, I, ifElse, then, concat, compose, tap, K, validationToTask} from "./util";
 import {List} from 'immutable-ext'
+import {mergeSystemSchema} from './schema'
+import {mergeOptionWithBuiltInScalars} from './builtin-scalars'
+
 
 const required = name => ifElse(
 	I,
@@ -35,7 +38,8 @@ const validators = [
 	//todo: only persistent type's field can set @relation directive
 ]
 
-export default (option: GraphqlizeOption) =>
+// GraphqlizeOption -> Task GraphqlizeOption
+const validateOption = (option: GraphqlizeOption) =>
 	validationToTask(
 		List(validators)
 		.ap(List.of(option))
@@ -43,3 +47,7 @@ export default (option: GraphqlizeOption) =>
 		.map(K(option))
 	)
 	
+export const getOption = (option: GraphqlizeOption) =>
+	validateOption(option)
+		.map(mergeSystemSchema)
+		.map(mergeOptionWithBuiltInScalars)

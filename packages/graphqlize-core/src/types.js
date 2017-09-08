@@ -68,3 +68,4 @@ export type Relationship = {
 	}
 }
 export type Db = typeof Sequelize
+

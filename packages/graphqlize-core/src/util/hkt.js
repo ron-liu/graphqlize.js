@@ -3,7 +3,8 @@ import {
 	rejected as taskRejected,
 	fromPromised as promiseToTask,
 	do as taskDo,
-	task
+	task,
+	waitAll as taskAll
 } from 'folktale/concurrency/task'
 
 export const Box = x =>
@@ -26,4 +27,4 @@ export const taskTry = fn => {
 	}
 }
 
-export {taskOf, taskRejected, promiseToTask, taskDo, task}
+export {taskOf, taskRejected, promiseToTask, taskDo, task, taskAll}

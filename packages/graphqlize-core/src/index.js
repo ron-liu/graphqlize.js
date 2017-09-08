@@ -1,21 +1,22 @@
 import type {Graphqlize} from './types'
-import {taskDo, taskOf} from './util'
-import validate from './validate'
-import {mergeSystemSchema} from './schema'
+import {taskDo, taskAll, taskOf} from './util'
+import {getOption} from './option'
 import {getAst} from './ast'
 import {getRelationshipFromAst} from './relationship'
-import {mergeOptionWithBuiltInScalars} from './builtin-scalars'
-import {initSequelize, sync} from './db'
+import {initSequelize, registerGetDbService, sync} from './db'
 
 const graphqlize : Graphqlize = async (option = {}) => {
 	
 	const app = taskDo(function *() {
-		const validatedOption = yield validate(option)
-			.map(mergeSystemSchema)
-			.map(mergeOptionWithBuiltInScalars)
-		const db = yield initSequelize(validatedOption)
-		const ast = yield getAst(validatedOption)
-		return  getRelationshipFromAst(ast)
+		const validatedOption = yield getOption(option)
+		
+		const [db, ast] = yield taskAll([
+			initSequelize(validatedOption),
+			getAst(validatedOption)
+		])
+		yield registerGetDbService(validatedOption, db)
+		const relationship = yield getRelationshipFromAst(ast)
+		return taskOf()
 	})
 	
 	return await app.run().promise()
