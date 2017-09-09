@@ -1,4 +1,4 @@
-import {schemaToAst} from '../ast'
+import {getAst} from '../ast'
 import {getRelationshipFromAst} from '../relationship'
 
 const types = [
@@ -13,18 +13,19 @@ const types = [
 		}`
 ]
 
-test('n-1 should work', () => {
-	const relationships = schemaToAst({types})
+test('n-1 should work', async () => {
+	const relationships = await getAst({schema:{types}})
 		.chain(getRelationshipFromAst)
-		.fold(
-			() => {throw new Error('should not have errors')},
-			x => expect(x).toEqual([
-				{
-					from: {multi: true, model: 'Post', as: "comments"},
-					to: {multi: false, model: 'Comment'},
-				}
-			])
-		)
+		.run()
+		.promise()
+	
+	
+	expect(relationships).toEqual([
+		{
+			from: {multi: true, model: 'Post', as: "comments"},
+			to: {multi: false, model: 'Comment'},
+		}
+	])
 })
 
 //todo: 1-n 1-1 n-n tests, and other edge cases tests

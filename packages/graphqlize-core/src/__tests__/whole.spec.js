@@ -4,10 +4,16 @@ import {createCore} from 'injectable-core'
 test('whole should work', async () => {
 	const option = {
 		schema: {
-			types: [`type Post {
+			types: [
+				`
+				interface Saas {post: Post}
+				type Post @persistent {
 					content: String
 				}
-			`]
+				type Comment implements Saas {
+					posts: [Post!]! @relation(name: commentPost)
+				}
+				`]
 		},
 		connection: {
 			option: {
