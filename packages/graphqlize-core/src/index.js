@@ -1,9 +1,11 @@
 import type {Graphqlize} from './types'
-import {taskDo, taskAll, taskOf} from './util'
+import {taskDo, taskAll, taskOf, taskRejected} from './util'
 import {getOption} from './option'
 import {getAst} from './ast'
 import {getRelationshipFromAst} from './relationship'
 import {initSequelize, registerGetDbService, sync} from './db'
+import {getModels} from './model'
+import {printJson} from "./util/misc";
 
 const graphqlize : Graphqlize = async (option = {}) => {
 	
@@ -14,12 +16,23 @@ const graphqlize : Graphqlize = async (option = {}) => {
 			initSequelize(validatedOption),
 			getAst(validatedOption)
 		])
+		
+		printJson(ast)
 		yield registerGetDbService(validatedOption, db)
 		const relationship = yield getRelationshipFromAst(ast)
+		
+		const models = yield getModels(ast, validatedOption)
+		printJson(models)
 		return taskOf()
 	})
 	
-	return await app.run().promise()
+	return await app
+	.orElse(x=>{
+		console.log('error caught:', x)
+		return taskRejected(x)
+	})
+	.run()
+	.promise()
 }
 
 export default graphqlize

@@ -1,3 +1,5 @@
+// @flow
+
 import type {Fn4, Fn1} from './basic-types'
 import Sequelize from 'sequelize'
 
@@ -69,3 +71,37 @@ export type Relationship = {
 }
 export type Db = typeof Sequelize
 
+export type Connector = mixed
+
+type SequelizeType = mixed
+
+export type Field = {
+	name: string,
+	isList: boolean,
+	allowNullList: boolean,
+	primaryKey: boolean,
+	allowNull: boolean,
+	isSystemField: boolean,
+	
+	graphqlType: string,
+	sequelizeType: SequelizeType,
+	fieldKind: 'scalar' | 'enum' | 'valueObject' | 'relation'
+}
+
+type Argument = {
+	name: string,
+	value: string
+}
+
+export type Directive = {
+	name: string,
+	arguments: [Argument]
+}
+
+export type Model = {
+	connector: Connector,
+	interfaces: [string],
+	directives: [Directive],
+	fields: [Field],
+	modelKind: 'valueObject' | 'persistence' | 'outSourcing'
+}

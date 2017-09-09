@@ -57,7 +57,6 @@ const filterTypesFieldsWithRelationDirective = astTypes => astTypes
 // AstTypes -> Failure [error] | Success [Field]
 const extractTypeFields = astType => Result.of(astType) // Result [AstType]
 	.map(prop('fields'))    // Result [AstField]
-	.map(tap(x=>console.log(x, 877)))
 	.map(map(applySpec({      // [Field]
 			objectName: K(astType.name),
 			name: path(['name', 'value']),
