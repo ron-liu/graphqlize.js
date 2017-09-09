@@ -8,7 +8,6 @@ import {getModels} from './model'
 import {printJson} from "./util/misc";
 
 const graphqlize : Graphqlize = async (option = {}) => {
-	
 	const app = taskDo(function *() {
 		const validatedOption = yield getOption(option)
 		

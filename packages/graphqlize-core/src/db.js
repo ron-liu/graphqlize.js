@@ -31,4 +31,6 @@ export const sync = curry((option, connector) => pipe(
 	map(K(true))
 )(option))
 
+export const defineSequelizeModels = (db, models)
+
 

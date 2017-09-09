@@ -10,6 +10,7 @@ import {
 export const Box = x =>
 	({
 		map: f => Box(f(x)),
+		ap: g => g.map(x),
 		fold: f => f(x),
 		inspect: () => `Box(${x})`
 	})

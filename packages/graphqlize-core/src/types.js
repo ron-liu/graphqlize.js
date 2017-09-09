@@ -73,7 +73,7 @@ export type Db = typeof Sequelize
 
 export type Connector = mixed
 
-type SequelizeType = mixed
+export type SequelizeType = mixed
 
 export type Field = {
 	name: string,
