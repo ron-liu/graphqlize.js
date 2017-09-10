@@ -49,14 +49,15 @@ const getSequelizeModelDefinitions = pipe(
 	fromPairs
 )
 
-export const defineSequelizeModels = (db, models) => taskOf(models)
-	.map(forEach(
-		converge(curry((modelName, definitions) => db.define(modelName, definitions)),
-			[
-				prop('name'),
-				getSequelizeModelDefinitions
-			]
+export const defineSequelizeModels = (db, models) => taskTry(
+	() => {
+		models.forEach(
+			converge((modelName, definitions) => db.define(modelName, definitions),
+				[
+					prop('name'),
+					getSequelizeModelDefinitions
+				]
+			)
 		)
-	))
-
+	})
 
