@@ -3,7 +3,7 @@ import {taskDo, taskAll, taskOf, taskRejected} from './util'
 import {getOption} from './option'
 import {getAst} from './ast'
 import {getRelationshipFromAst} from './relationship'
-import {initSequelize, registerGetDbService, sync} from './db'
+import {defineSequelizeModels, initSequelize, registerGetDbService, sync} from './db'
 import {getModels} from './model'
 import {printJson} from "./util/misc";
 
@@ -16,12 +16,11 @@ const graphqlize : Graphqlize = async (option = {}) => {
 			getAst(validatedOption)
 		])
 		
-		printJson(ast)
 		yield registerGetDbService(validatedOption, db)
 		const relationship = yield getRelationshipFromAst(ast)
-		
 		const models = yield getModels(ast, validatedOption)
-		printJson(models)
+		yield defineSequelizeModels(db, models)
+		
 		return taskOf()
 	})
 	

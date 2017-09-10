@@ -99,7 +99,6 @@ export type Directive = {
 }
 
 export type Model = {
-	connector: Connector,
 	interfaces: [string],
 	directives: [Directive],
 	fields: [Field],

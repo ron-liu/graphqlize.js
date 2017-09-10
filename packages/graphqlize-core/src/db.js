@@ -1,6 +1,9 @@
 import Sequelize from 'sequelize'
 import { GraphqlizeOption, Connection, Db} from './types'
-import {Box, pipe, props, K, curry, prop, isNil, promiseToTask, Task, map, ifElse, tap, path, taskOf, taskTry} from './util'
+import {
+	Box, pipe, props, K, curry, prop, isNil, promiseToTask, Task, map, ifElse, tap, path, taskOf, taskTry,
+	applySpec, converge, pair, fromPairs, forEach, propSatisfies, isNotNil, filter
+} from './util'
 import {CurriedFn2, Fn1} from './basic-types'
 
 // GraphqlizeOption -> Task error db
@@ -31,6 +34,29 @@ export const sync = curry((option, connector) => pipe(
 	map(K(true))
 )(option))
 
-export const defineSequelizeModels = (db, models)
+// [Field] -> {[id:string]: SequelizeFieldDefinition}
+const getSequelizeModelDefinitions = pipe(
+	prop('fields'),
+	filter(propSatisfies(isNotNil, 'sequelizeType')),
+	map(converge(pair, [
+		prop('name'),
+		applySpec({
+			type: prop('sequelizeType'),
+			allowNull: ifElse(prop('isList'), prop('allowNullList'), prop('allowNull')),
+			primaryKey: prop('primaryKey')
+		})
+	])),
+	fromPairs
+)
+
+export const defineSequelizeModels = (db, models) => taskOf(models)
+	.map(forEach(
+		converge(curry((modelName, definitions) => db.define(modelName, definitions)),
+			[
+				prop('name'),
+				getSequelizeModelDefinitions
+			]
+		)
+	))
 
 
