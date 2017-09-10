@@ -61,3 +61,36 @@ export const defineSequelizeModels = (db, models) => taskTry(
 		)
 	})
 
+export const defineSequelizeRelations = (db, relationships) => taskTry(
+	() => {
+		relationships.forEach(
+			({
+				from:{multi: fromMulti, as: fromAs, model: fromModelName},
+				to: {to: toMulti, as: toAs, model: toModelName}
+			}) => {
+				const FromModel = db.model(fromModelName)
+				const ToModel = db.model(toModelName)
+				
+				// n-n, must be bi-direction
+				if (fromMulti && toMulti) {
+					FromModel.belongsToMany(ToModel, {as: fromAs, through: `${fromModelName}${toModelName}_${fromAs}`})
+					ToModel.belongsToMany(FromModel, {as: toAs, through: `${fromModelName}${toModelName}_${fromAs}`})
+					return
+				}
+				
+				// n-1 or 1-1
+				if (!toMulti) {
+					const foreignKey = `${fromAs}Id`
+					FromModel.belongsTo(ToModel, {as: fromAs, foreignKey})
+					toAs && ToModel[fromMulti ? 'hasMany' : 'hasOne'](FromModel, {as: toAs})
+					return
+				}
+				
+				// 1-n
+				const foreignKey = toAs ? `${toAs}Id` :  `id_for_${fromModelName}_${fromAs}`
+				FromModel.hasMany(ToModel, {as: fromAs, foreignKey})
+				toAs && ToModel.belongsTo(FromModel, {as: toAs, foreignKey})
+			}
+		)
+	}
+)

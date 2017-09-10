@@ -1,5 +1,5 @@
 import {getAst} from '../ast'
-import {getRelationshipFromAst} from '../relationship'
+import {getRelationshipsFromAst} from '../relationship'
 
 const types = [
 	`type Post {
@@ -15,7 +15,7 @@ const types = [
 
 test('n-1 should work', async () => {
 	const relationships = await getAst({schema:{types}})
-		.chain(getRelationshipFromAst)
+		.chain(getRelationshipsFromAst)
 		.run()
 		.promise()
 	

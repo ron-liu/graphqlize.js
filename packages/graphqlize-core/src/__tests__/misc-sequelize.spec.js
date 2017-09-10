@@ -2,7 +2,7 @@ import Sequelize from 'sequelize'
 
 const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
 
-describe ("n-1 should be queryable", () => {
+describe ("n-1 1-n should be queryable", () => {
 	const PostModel = sequelize.define('Post', {
 		title: Sequelize.STRING,
 		createdBy: Sequelize.STRING
@@ -99,7 +99,7 @@ describe ('1-1 should', () => {
 	
 })
 
-describe ('n-n', async () => {
+describe('n-n', async () => {
 	const UserModel = sequelize.define('user', {
 		name: Sequelize.STRING
 	})
@@ -115,4 +115,18 @@ describe ('n-n', async () => {
 		await sequelize.sync({force: true})
 		done()
 	})
+	test('should work', ()=>{})
+})
+
+describe.only ('1-n only',  () => {
+	const StudentModel = sequelize.define('student', {name: Sequelize.STRING})
+	const ClassModel = sequelize.define('class', {logo: Sequelize.STRING})
+	
+	ClassModel.hasMany(StudentModel, {as: 'students'})
+
+	beforeAll(async(done) => {
+		await sequelize.sync({force: true})
+		done()
+	})
+	test('should work', ()=>{})
 })

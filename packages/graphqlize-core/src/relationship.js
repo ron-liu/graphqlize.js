@@ -1,4 +1,4 @@
-import type {Relationships, Schema, ModelRelationships, Ast} from './types'
+import type {Relationship, Schema, Ast} from './types'
 import type {Fn1, CurriedFn2} from './basic-types'
 import {
 	__, pipe, propEq, map, ifElse, I, concat, converge, of2, K, flatten, path, assoc, propSatisfies, lensProp,
@@ -103,7 +103,7 @@ const generateRelationship = applySpec({
 	})
 
 // Ast -> Validation.Failure | Result.Ok relationships
-export const getRelationshipFromAst = ast => taskOf(ast) // Ok ast
+export const getRelationshipsFromAst = ast => taskOf(ast) // Ok ast
 	.map(getPersistentTypes)    // Ok [AstType]
 	.map(filterTypesFieldsWithRelationDirective) // Ok [AstType]
 	.chain(pipe(extractTypesFields, validationToTask))  // Failure [error] | Success [Field]
