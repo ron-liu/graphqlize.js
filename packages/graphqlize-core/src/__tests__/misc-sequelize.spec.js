@@ -14,7 +14,7 @@ describe ("n-1 1-n should be queryable", () => {
 	PostModel.hasMany(CommentModel, {as: 'comments', foreignKey: 'postId'})
 	CommentModel.belongsTo(PostModel, {as: 'post', foreignKey: 'postId'})
 	
-	beforeAll(async(done) => {
+	beforeEach(async(done) => {
 		await sequelize.sync({force: true})
 		done()
 	})
@@ -28,7 +28,7 @@ describe ("n-1 1-n should be queryable", () => {
 			{title: 'oh', createdBy: 'john', comments: [{content: 'good', createdBy: 'ron'}]},
 			{include: [{model: CommentModel, as: 'comments'}]}
 		)
-		
+
 		const result = await CommentModel.findAll(
 			{
 				where: {
@@ -41,6 +41,53 @@ describe ("n-1 1-n should be queryable", () => {
 			}
 		)
 		expect(result).toHaveLength(2)
+	})
+
+	test('trying to use generate query statement', async () => {
+		const Model = require('sequelize/lib/model')
+		let options = {
+			include: [
+				{model: CommentModel, as: "comments"}
+			],
+			model: PostModel
+		};
+		Model._validateIncludedElements.bind(PostModel)(options) // for es5 you can use call
+		const sql = sequelize.dialect.QueryGenerator.selectQuery(PostModel.tableName, options, PostModel);
+		console.log(sql)
+	})
+	
+	test('trying subquery', async () => {
+		await PostModel.create(
+			{title: 'hi', createdBy: 'ron', comments: [{content: 'good', createdBy: 'john'}]},
+			{include: [{model: CommentModel, as: 'comments'}]}
+		)
+		await PostModel.create(
+			{title: 'oh', createdBy: 'john', comments: [{content: 'good', createdBy: 'ron'}]},
+			{include: [{model: CommentModel, as: 'comments'}]}
+		)
+		
+		const Model = require('sequelize/lib/model')
+		let options = {
+			attributes: ['postId'],
+			where: {
+				createdBy: 'ron'
+			}
+		};
+		const subSql = sequelize.dialect.QueryGenerator
+		.selectQuery(CommentModel.tableName, options, CommentModel)
+		.slice(0,-1)
+		
+		const posts = (await PostModel.findAll({
+			where: {
+				id: {$in: sequelize.literal(`(${subSql})`)}
+			}
+		}))
+		
+		expect(posts).toHaveLength(1)
+		expect(posts[0].get().title).toEqual('oh')
+		
+		
+		
 	})
 })
 
@@ -100,13 +147,8 @@ describe ('1-1 should', () => {
 })
 
 describe('n-n', async () => {
-	const UserModel = sequelize.define('user', {
-		name: Sequelize.STRING
-	})
-	
-	const TeamModel = sequelize.define('team', {
-		logo: Sequelize.STRING
-	})
+	const UserModel = sequelize.define('user', { name: Sequelize.STRING })
+	const TeamModel = sequelize.define('team', { logo: Sequelize.STRING})
 	
 	UserModel.belongsToMany(TeamModel,  {through: 'UserTeam', as: 'teams'})
 	TeamModel.belongsToMany(UserModel, {through: 'UserTeam', as: 'users'})
@@ -118,7 +160,7 @@ describe('n-n', async () => {
 	test('should work', ()=>{})
 })
 
-describe.only ('1-n only',  () => {
+describe ('1-n only',  () => {
 	const StudentModel = sequelize.define('student', {name: Sequelize.STRING})
 	const ClassModel = sequelize.define('class', {logo: Sequelize.STRING})
 	

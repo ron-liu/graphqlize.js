@@ -25,14 +25,14 @@ export const registerGetDbService = (option, db) => taskTry(
 )
 
 // GraphqlizeOption -> Db -> Task
-export const sync = curry((option, connector) => pipe(
+export const sync = (option, connector) => pipe(
 	ifElse(
 		pipe(path(['connection', 'option', 'sync']), isNil),
 		taskOf,
 		pipe(path(['connection', 'option', 'sync']), x => connector.sync(x), promiseToTask)
 	),
 	map(K(true))
-)(option))
+)(option)
 
 // [Field] -> {[id:string]: SequelizeFieldDefinition}
 const getSequelizeModelDefinitions = pipe(
