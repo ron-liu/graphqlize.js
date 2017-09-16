@@ -66,7 +66,6 @@ describe ("n-1 1-n should be queryable", () => {
 			{include: [{model: CommentModel, as: 'comments'}]}
 		)
 		
-		const Model = require('sequelize/lib/model')
 		let options = {
 			attributes: ['postId'],
 			where: {
@@ -85,9 +84,6 @@ describe ("n-1 1-n should be queryable", () => {
 		
 		expect(posts).toHaveLength(1)
 		expect(posts[0].get().title).toEqual('oh')
-		
-		
-		
 	})
 })
 
@@ -146,18 +142,55 @@ describe ('1-1 should', () => {
 	
 })
 
-describe('n-n', async () => {
+describe.only('n-n', async () => {
 	const UserModel = sequelize.define('user', { name: Sequelize.STRING })
 	const TeamModel = sequelize.define('team', { logo: Sequelize.STRING})
 	
-	UserModel.belongsToMany(TeamModel,  {through: 'UserTeam', as: 'teams'})
-	TeamModel.belongsToMany(UserModel, {through: 'UserTeam', as: 'users'})
+	UserModel.belongsToMany(TeamModel,  {through: 'userTeam', as: 'teams'})
+	TeamModel.belongsToMany(UserModel, {through: 'userTeam', as: 'users'})
 	
-	beforeAll(async(done) => {
+	beforeEach(async(done) => {
 		await sequelize.sync({force: true})
 		done()
 	})
-	test('should work', ()=>{})
+	
+	// test('should work', ()=>{})
+	
+	test('subquery should work', async ()=>{
+		await UserModel.create(
+			{name: 'ron', teams: [{logo: 'x'}, {logo: 'y'}]},
+			{include: {model: TeamModel, as: 'teams'}}
+		)
+		await UserModel.create(
+			{name: 'angela', teams: [{logo: 'a'}, {logo: 'b'}]},
+			{include: {model: TeamModel, as: 'teams'}}
+		)
+		
+		const subSql = sequelize.dialect.QueryGenerator
+		.selectQuery(TeamModel.tableName, {
+			attributes: ['id'],
+			where: {
+				$or: [{logo: 'x'}, {logo: 'a'}]
+			}
+		}, TeamModel)
+		.slice(0,-1)
+		
+		const users = (await UserModel.findAll({
+			attributes: [],
+			where: {
+				'$teams.userTeam.teamId$': {$in: sequelize.literal(`(${subSql})`)}
+			},
+			include: [
+				{
+					model: TeamModel,
+					as: 'teams',
+				}
+			]
+		})).map(x=>x.get())
+		
+		expect(users).toHaveLength(2)
+
+	})
 })
 
 describe ('1-n only',  () => {
