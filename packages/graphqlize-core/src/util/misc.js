@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize'
+import {converge, pipe, head, toUpper, tail, concat} from './functions'
 
 export const printJson = x => console.log(JSON.stringify(x, null, '\t'))
 
@@ -19,3 +20,9 @@ export const SequelizeJsonType = {
 	}
 }
 
+export const capitalize: (word: string) => string = converge(
+	concat, [
+		pipe(head, toUpper),
+		tail
+	]
+)

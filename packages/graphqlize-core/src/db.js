@@ -25,11 +25,11 @@ export const registerGetDbService = (option, db) => taskTry(
 )
 
 // GraphqlizeOption -> Db -> Task
-export const sync = (option, connector) => pipe(
+export const sync = (option, db) => pipe(
 	ifElse(
 		pipe(path(['connection', 'option', 'sync']), isNil),
 		taskOf,
-		pipe(path(['connection', 'option', 'sync']), x => connector.sync(x), promiseToTask)
+		pipe(path(['connection', 'option', 'sync']), x => db.sync(x), promiseToTask)
 	),
 	map(K(true))
 )(option)

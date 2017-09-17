@@ -1,7 +1,7 @@
 import {Success, Failure, collect} from 'folktale/validation'
 import Result from 'folktale/result'
 import type {GraphqlizeOption} from './types'
-import {path, I, ifElse, then, concat, compose, tap, K, validationToTask} from "./util";
+import {path, I, ifElse, then, concat, compose, tap, K, validationToTask, evolve, when, isNil, Box} from "./util";
 import {List} from 'immutable-ext'
 import {mergeSystemSchema} from './schema'
 import {mergeOptionWithBuiltInScalars} from './builtin-scalars'
@@ -46,8 +46,20 @@ const validateOption = (option: GraphqlizeOption) =>
 		.reduce(concat, Success())
 		.map(K(option))
 	)
-	
+
+// GraphqlizeOption -> GraphqlizeOption
+const rectifyOption = option => evolve(
+	{
+		connectorMiddlewares: when(isNil, K([])),
+		resolvers: when(isNil, K({})),
+		handlers: when(isNil, K({}))
+	},
+	option
+)
+
+// GraphqlizeOption -> Task GraphqlizeOption
 export const getOption = (option: GraphqlizeOption) =>
 	validateOption(option)
 		.map(mergeSystemSchema)
 		.map(mergeOptionWithBuiltInScalars)
+		.map(rectifyOption)

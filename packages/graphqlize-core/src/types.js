@@ -51,10 +51,11 @@ export type GraphqlizeOption = {
 	customerScalars?: CustomScalars,
 	resolvers?: WholeResolvers,
 	handlers?: Handlers,
-	core: Core
+	core: Core,
+	connectorMiddlewares?: [string]
 }
 type ExecutableSchema = mixed // Task<executableSchema>
-export type Graphqlize = Fn1<GraphqlizeOption,ExecutableSchema>
+export type Graphqlize = Fn1<GraphqlizeOption, ExecutableSchema>
 
 export type Ast = mixed
 export type Relationship = {
@@ -99,6 +100,7 @@ export type Directive = {
 }
 
 export type Model = {
+	name: string,
 	interfaces: [string],
 	directives: [Directive],
 	fields: [Field],

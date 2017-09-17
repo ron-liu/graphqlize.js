@@ -53,7 +53,6 @@ describe ("n-1 1-n should be queryable", () => {
 		};
 		Model._validateIncludedElements.bind(PostModel)(options) // for es5 you can use call
 		const sql = sequelize.dialect.QueryGenerator.selectQuery(PostModel.tableName, options, PostModel);
-		console.log(sql)
 	})
 	
 	test('trying subquery', async () => {
@@ -142,7 +141,7 @@ describe ('1-1 should', () => {
 	
 })
 
-describe.only('n-n', async () => {
+describe('n-n', async () => {
 	const UserModel = sequelize.define('user', { name: Sequelize.STRING })
 	const TeamModel = sequelize.define('team', { logo: Sequelize.STRING})
 	
