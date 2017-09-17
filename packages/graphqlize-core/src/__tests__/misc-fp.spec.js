@@ -78,7 +78,6 @@ test('attempt#4 put all outputs into a state which will pass through',  async ()
 	console.log(result) //     token-connection75-account-connection75
 })
 
-
 test.only('attempt#5 use do co', async () => {
 	const mdo = require('fantasy-do')
 	

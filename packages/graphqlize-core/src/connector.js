@@ -34,7 +34,6 @@ const buildAndAddGetModelConnectorService = ({option, db, model}) => taskTry(
 	}))
 )
 
-export const buildAndAddGetModelConnectorsService = ({option, db, models}) => taskTry(
-	() => List(models)
+export const buildAndAddGetModelConnectorsServices = ({option, db, models}) =>
+	List(models)
 	.traverse(taskOf, model => buildAndAddGetModelConnectorService({option, db, model}))
-).chain(I)

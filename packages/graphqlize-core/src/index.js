@@ -5,12 +5,13 @@ import {getAst} from './ast'
 import {getRelationshipsFromAst} from './relationship'
 import {defineSequelizeModels, defineSequelizeRelations, initSequelize, registerGetDbService, sync} from './db'
 import {getModels} from './model'
-import {buildAndAddGetModelConnectorsService} from './connector'
+import {buildAndAddGetModelConnectorsServices} from './connector'
 import {printJson} from "./util/misc";
 
 const graphqlize : Graphqlize = async (option = {}) => {
 	const app = taskDo(function *() {
 		const validatedOption = yield getOption(option)
+		printJson(validatedOption)
 		
 		const [db, ast] = yield taskAll([
 			initSequelize(validatedOption),
@@ -22,7 +23,7 @@ const graphqlize : Graphqlize = async (option = {}) => {
 		const models = yield getModels(ast, validatedOption)
 		yield defineSequelizeModels(db, models)
 		yield defineSequelizeRelations(db, relationships)
-		yield buildAndAddGetModelConnectorsService({option: validatedOption, db, models})
+		yield buildAndAddGetModelConnectorsServices({option: validatedOption, db, models})
 		
 		return taskOf()
 	})

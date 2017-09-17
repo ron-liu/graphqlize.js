@@ -1,7 +1,10 @@
 import {Success, Failure, collect} from 'folktale/validation'
 import Result from 'folktale/result'
 import type {GraphqlizeOption} from './types'
-import {path, I, ifElse, then, concat, compose, tap, K, validationToTask, evolve, when, isNil, Box} from "./util";
+import {
+	path, I, ifElse, then, concat, compose, tap, K, validationToTask, evolve, when, isNil, Box, propSatisfies,
+	set, lensProp, pipe
+} from "./util";
 import {List} from 'immutable-ext'
 import {mergeSystemSchema} from './schema'
 import {mergeOptionWithBuiltInScalars} from './builtin-scalars'
@@ -48,13 +51,10 @@ const validateOption = (option: GraphqlizeOption) =>
 	)
 
 // GraphqlizeOption -> GraphqlizeOption
-const rectifyOption = option => evolve(
-	{
-		connectorMiddlewares: when(isNil, K([])),
-		resolvers: when(isNil, K({})),
-		handlers: when(isNil, K({}))
-	},
-	option
+const rectifyOption = pipe(
+	when(propSatisfies(isNil, 'connectorMiddlewares'), set(lensProp('connectorMiddlewares'), [])),
+	when(propSatisfies(isNil, 'resolvers'), set(lensProp('resolvers'), {})),
+	when(propSatisfies(isNil, 'handlers'), set(lensProp('handlers'), {}))
 )
 
 // GraphqlizeOption -> Task GraphqlizeOption

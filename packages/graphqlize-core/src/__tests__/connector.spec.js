@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize'
-import {buildAndAddGetModelConnectorsService} from "../connector";
+import {buildAndAddGetModelConnectorsServices} from "../connector";
 import {createCore} from 'injectable-core'
 
 const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
@@ -25,7 +25,7 @@ describe('connector service', () => {
 		done()
 	})
 	test('should be added', async () => {
-		await buildAndAddGetModelConnectorsService({
+		await buildAndAddGetModelConnectorsServices({
 			option: {
 				connectorMiddlewares: [],
 				core
@@ -57,7 +57,7 @@ describe('connector service with middlewares', () => {
 		done()
 	})
 	test('should be added', async () => {
-		await buildAndAddGetModelConnectorsService({
+		await buildAndAddGetModelConnectorsServices({
 			option: {
 				connectorMiddlewares: ['autoAddComment'],
 				core,

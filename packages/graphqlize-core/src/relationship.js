@@ -4,12 +4,12 @@ import {
 	__, pipe, propEq, map, ifElse, I, concat, converge, of2, K, flatten, path, assoc, propSatisfies, lensProp,
 	filter, both, either, pathEq, isNil, not, applySpec, prop, tap, curry, when, equals, printJson, any, pick, over,
 	all, contains, forEach, find, groupWith, gt, head, length, last, reject, reduce, Box, pathSatisfies, of, isEmpty,
-	taskOf
+	taskOf, set, lensPath
 } from './util'
 import {TYPE_KIND} from './constants'
 import {Failure, Success, collect} from 'folktale/validation'
 import Result from 'folktale/result'
-import {validationToTask} from "./util/hkt";
+import {taskTry, validationToTask} from "./util/hkt";
 
 const getBaseTypeFromField = pipe(
 	prop('type'),
@@ -55,9 +55,9 @@ const filterTypesFieldsWithRelationDirective = astTypes => astTypes
 	.filter(propSatisfies(pipe(isEmpty, not), 'fields'))
 
 // AstTypes -> Failure [error] | Success [Field]
-const extractTypeFields = astType => Result.of(astType) // Result [AstType]
+const extractTypeFields = astType => Box(astType) // Result [AstType]
 	.map(prop('fields'))    // Result [AstField]
-	.map(map(applySpec({      // [Field]
+	.fold(map(applySpec({      // [Field]
 			objectName: K(astType.name),
 			name: path(['name', 'value']),
 			type: getBaseTypeFromField,
@@ -70,16 +70,12 @@ const extractTypeFields = astType => Result.of(astType) // Result [AstType]
 				.fold(I)
 		}))
 	)
-	.map(map(ifElse(            //  [Failure [error] | Success [Field] ]
-		propSatisfies(isNil, 'relationName'),
-		({objectName, name}) => Failure([`${objectName}:${name}，@relation must have name parameter`]),
-		pipe(of, Success)
-	)))
-	.chain(collect)         // Failure [error] | Success [Field]
 
-const extractTypesFields = astTypes => Result.of(astTypes)
-	.map(map(extractTypeFields))
-	.chain(reduce(concat, Success([])))
+const extractTypesFields = astTypes => taskTry(
+	() => Box(astTypes)
+		.map(map(extractTypeFields))
+		.fold(flatten)
+)
 
 const generateRelationship = applySpec({
 		from: applySpec({
@@ -106,6 +102,14 @@ const generateRelationship = applySpec({
 export const getRelationshipsFromAst = ast => taskOf(ast) // Ok ast
 	.map(getPersistentTypes)    // Ok [AstType]
 	.map(filterTypesFieldsWithRelationDirective) // Ok [AstType]
-	.chain(pipe(extractTypesFields, validationToTask))  // Failure [error] | Success [Field]
+	.chain(extractTypesFields)
 	.map(groupWith((a, b) => a.relationName === b.relationName)) // Failure [error] | Success [ [Field, Field] ]
 	.map(map(generateRelationship))
+
+export const getModelRelationships : Fn1<[Relationship], [Relationship]> = (relationships, modelName) => Box(relationships)
+	.map(filter(either(pathEq(['from', 'model'], modelName), pathEq(['to', 'model'], modelName))))
+	.map(map(when(
+		pipe(pathEq(['from', 'model'], modelName), not),
+		applySpec({from: prop('to'), to: prop('from')})
+	)))
+	.fold(map(set(lensPath(['to', 'as']), undefined)))
