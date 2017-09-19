@@ -84,7 +84,7 @@ export type Field = {
 	allowNull: boolean,
 	isSystemField: boolean,
 	
-	graphqlType: string,
+	graphqlizeType: string,
 	sequelizeType: SequelizeType,
 	fieldKind: 'scalar' | 'enum' | 'valueObject' | 'relation'
 }
@@ -105,4 +105,12 @@ export type Model = {
 	directives: [Directive],
 	fields: [Field],
 	modelKind: 'valueObject' | 'persistence' | 'outSourcing'
+}
+
+type Action = 'create' | 'update' | 'upsert' | 'delete'
+
+export type GenModelInputOption = {
+	allowIdNull: boolean,
+	allowFieldsOtherThanIdNull: boolean,
+	action: string
 }

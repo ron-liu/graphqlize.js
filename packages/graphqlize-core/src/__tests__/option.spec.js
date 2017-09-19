@@ -59,7 +59,6 @@ test('rectify should not touch filled props', async () => {
 		resolvers: {a:1},
 		handlers: {b:2},
 		connectorMiddlewares: ['abc']
-		
 	}
 	
 	const validatedOption = await getOption(option)

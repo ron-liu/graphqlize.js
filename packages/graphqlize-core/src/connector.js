@@ -23,6 +23,7 @@ const buildAndAddGetModelConnectorService = ({option, db, model}) => taskTry(
 				findOne: options => model.findOne({...options}),
 				destroy: options => model.destroy({...options}),
 				update: (values, option) => model.update(values, {...option}),
+				upsert: (values, option) => model.upsert(values, {...option}),
 				create: (values, options) => model.create(values, {...options})
 			}))
 			for(const middleware of values(middlewares)) {

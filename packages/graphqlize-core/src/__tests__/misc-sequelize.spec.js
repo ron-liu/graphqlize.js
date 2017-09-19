@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize'
+import {v4} from 'uuid'
 
 const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
 
@@ -203,4 +204,36 @@ describe ('1-n only',  () => {
 		done()
 	})
 	test('should work', ()=>{})
+})
+
+describe('upsert', () => {
+	const StudentModel = sequelize.define('student', {
+		name: Sequelize.STRING,
+		id: {
+			type: Sequelize.UUID,
+			primaryKey: true,
+			defaultValue: Sequelize.UUIDV4
+		}
+	})
+	beforeEach(async(done) => {
+		await sequelize.sync({force: true})
+		done()
+	})
+	test('should work for update', async ()=>{
+		const {id} = await StudentModel.create({name: 'ron'})
+		await StudentModel.upsert({id, name: 'abc'})
+		
+		const students = await StudentModel.findAll()
+		expect(students).toHaveLength(1)
+		expect(students[0].get()).toEqual(expect.objectContaining({id, name: 'abc'}))
+	})
+
+	test('should work for update', async ()=>{
+		const {id} = await StudentModel.create({name: 'ron'})
+		const newId = v4()
+		await StudentModel.upsert({name: 'abc', id: newId})
+		
+		const student = await StudentModel.findOne({where: { id: newId}})
+		expect(student.get()).toEqual(expect.objectContaining({id: newId, name: 'abc'}))
+	})
 })

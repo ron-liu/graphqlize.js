@@ -79,7 +79,7 @@ test('attempt#4 put all outputs into a state which will pass through',  async ()
 })
 
 test.only('attempt#5 use do co', async () => {
-	const mdo = require('fantasy-do')
+	const mdo = require('fantasy-do') //todo: replace with task do
 	
 	const app = mdo(function * () {
 		const connection = yield getDbConnection()

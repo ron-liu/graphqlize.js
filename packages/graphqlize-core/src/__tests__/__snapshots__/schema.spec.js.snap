@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`simple models inputs should ok 1`] = `
+Array [
+  "input CreatePersonInput {createdAt:DateTime updatedAt:DateTime id:ID name:String}",
+  "input DeletePersonInput {id:ID!}",
+  "input UpdatePersonInput {createdAt:DateTime updatedAt:DateTime id:ID! name:String}",
+  "input UpsertPersonInput {createdAt:DateTime updatedAt:DateTime id:ID name:String}",
+]
+`;
