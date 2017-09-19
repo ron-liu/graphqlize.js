@@ -168,6 +168,5 @@ export const getModels = (ast, option) => taskTry(() => {
 				concat(systemFields)
 			))
 		})))
-		.map(tap(printJson))
 		.fold(I)
 })

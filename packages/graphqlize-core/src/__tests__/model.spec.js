@@ -1,14 +1,6 @@
-import {getModels} from '../model'
-import {getAst} from '../ast'
-import {propEq, taskOf} from '../util'
+import {propEq} from '../util'
 import Sequelize from 'sequelize'
-
-const getModelsFromTypes = types => taskOf(types)
-	.map(x=>({schema: {types, customerScalars: []}}))
-	.chain(getAst)
-	.chain(x=>getModels(x, {schema: {types, customerScalars: []}}))
-	.run()
-	.promise()
+import {getModelsFromTypes} from './shared'
 
 test('model should be ok', async () => {
 	const types = [`

@@ -60,7 +60,8 @@ export const defineSequelizeModels = (db, models) => taskTry(
 				]
 			)
 		)
-	})
+	}
+)
 
 export const defineSequelizeRelations = (db, relationships) => taskTry(
 	() => {

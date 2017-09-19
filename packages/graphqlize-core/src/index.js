@@ -11,7 +11,6 @@ import {printJson} from "./util/misc";
 const graphqlize : Graphqlize = async (option = {}) => {
 	const app = taskDo(function *() {
 		const validatedOption = yield getOption(option)
-		printJson(validatedOption)
 		
 		const [db, ast] = yield taskAll([
 			initSequelize(validatedOption),

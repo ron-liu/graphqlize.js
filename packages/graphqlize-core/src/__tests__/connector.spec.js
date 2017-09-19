@@ -1,8 +1,9 @@
 import Sequelize from 'sequelize'
 import {buildAndAddGetModelConnectorsServices} from "../connector";
 import {createCore} from 'injectable-core'
+import {createSequelize} from './shared'
 
-const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
+const sequelize = createSequelize()
 const PostModel = sequelize.define('Post', {
 	title: Sequelize.STRING,
 	comment: Sequelize.STRING
