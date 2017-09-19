@@ -43,7 +43,8 @@ const getSequelizeModelDefinitions = pipe(
 		applySpec({
 			type: prop('sequelizeType'),
 			allowNull: ifElse(prop('isList'), prop('allowNullList'), prop('allowNull')),
-			primaryKey: prop('primaryKey')
+			primaryKey: prop('primaryKey'),
+			unique: prop('isUnique')
 		})
 	])),
 	fromPairs

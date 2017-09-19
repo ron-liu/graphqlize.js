@@ -3,8 +3,8 @@ import type {Fn1, CurriedFn2} from './basic-types'
 import {
 	__, pipe, propEq, map, ifElse, I, concat, converge, of2, K, flatten, path, assoc, propSatisfies, lensProp,
 	filter, both, either, pathEq, isNil, not, applySpec, prop, tap, curry, when, equals, printJson, any, pick, over,
-	all, contains, forEach, find, groupWith, gt, head, length, last, reject, reduce, Box, pathSatisfies, of, isEmpty,
-	taskOf, set, lensPath
+	all, contains, forEach, find, gt, head, length, last, reject, reduce, Box, pathSatisfies, of, isEmpty,
+	taskOf, set, lensPath, groupBy, values
 } from './util'
 import {TYPE_KIND} from './constants'
 import {Failure, Success, collect} from 'folktale/validation'
@@ -103,7 +103,8 @@ export const getRelationshipsFromAst = ast => taskOf(ast) // Ok ast
 	.map(getPersistenceTypes)    // Ok [AstType]
 	.map(filterTypesFieldsWithRelationDirective) // Ok [AstType]
 	.chain(extractTypesFields)
-	.map(groupWith((a, b) => a.relationName === b.relationName)) // Failure [error] | Success [ [Field, Field] ]
+	.map(groupBy(prop('relationName')))
+	.map(values)
 	.map(map(generateRelationship))
 
 export const getModelRelationships : Fn1<[Relationship], [Relationship]> = (relationships, modelName) => Box(relationships)
