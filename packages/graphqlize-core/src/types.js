@@ -83,7 +83,7 @@ export type Field = {
 	primaryKey: boolean,
 	allowNull: boolean,
 	isSystemField: boolean,
-	
+	isUnique: boolean,
 	graphqlizeType: string,
 	sequelizeType: SequelizeType,
 	fieldKind: 'scalar' | 'enum' | 'valueObject' | 'relation'

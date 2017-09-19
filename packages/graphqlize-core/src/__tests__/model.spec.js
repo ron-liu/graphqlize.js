@@ -1,7 +1,14 @@
 import {getModels} from '../model'
 import {getAst} from '../ast'
-import {propEq} from '../util'
+import {propEq, taskOf} from '../util'
 import Sequelize from 'sequelize'
+
+const getModelsFromTypes = types => taskOf(types)
+	.map(x=>({schema: {types, customerScalars: []}}))
+	.chain(getAst)
+	.chain(x=>getModels(x, {schema: {types, customerScalars: []}}))
+	.run()
+	.promise()
 
 test('model should be ok', async () => {
 	const types = [`
@@ -10,14 +17,9 @@ test('model should be ok', async () => {
 		name: String
 	}
 	`]
-	const option = {schema: {types}, customScalar: []}
-	const models = await getAst(option)
-	.chain(x=>getModels(x, option))
-	.run()
-	.promise()
+	const models = await getModelsFromTypes(types)
 	
 	expect(models).toHaveLength(1)
-	
 	const [model] = models
 	expect(model.name).toEqual('Person')
 	expect(model.interfaces).toEqual([])
@@ -30,11 +32,7 @@ test('model should have createdAt and updatedAt', async () => {
 		name: String
 	}
 	`]
-	const option = {schema: {types}, customScalar: []}
-	const models = await getAst(option)
-	.chain(x=>getModels(x, option))
-	.run()
-	.promise()
+	const models = await getModelsFromTypes(types)
 	
 	const [model] = models
 	expect(model.fields).toHaveLength(3)
@@ -50,11 +48,7 @@ test('model interfaces and directives should be ok', async () => {
 		name: String
 	}
 	`]
-	const option = {schema: {types}, customScalar: []}
-	const models = await getAst(option)
-	.chain(x=>getModels(x, option))
-	.run()
-	.promise()
+	const models = await getModelsFromTypes(types)
 	
 	const [model] = models
 	expect(model.interfaces).toEqual(['Node'])
@@ -69,11 +63,7 @@ test('scalar should be ok', async () => {
 		names: [String]
 	}
 	`]
-	const option = {schema: {types}, customScalar: []}
-	const models = await getAst(option)
-	.chain(x=>getModels(x, option))
-	.run()
-	.promise()
+	const models = await getModelsFromTypes(types)
 	
 	const [{fields}] = models
 	const nameField = fields.find(propEq('name', 'name'))
@@ -125,11 +115,7 @@ test('enum should be ok', async () => {
 		statuses: [PersonStatus]
 	}
 	`]
-	const option = {schema: {types}, customScalar: []}
-	const models = await getAst(option)
-	.chain(x=>getModels(x, option))
-	.run()
-	.promise()
+	const models = await getModelsFromTypes(types)
 	
 	const [{fields}] = models
 	const statusField = fields.find(propEq('name', 'status'))
@@ -167,17 +153,12 @@ test('valueObject should be ok', async () => {
 		name: String
 	}
 	`]
-	const option = {schema: {types}, customScalar: []}
-	const models = await getAst(option)
-	.chain(x=>getModels(x, option))
-	.run()
-	.promise()
+	const models = await getModelsFromTypes(types)
 	
 	const wechatModel = models.find(propEq('name', 'Wechat'))
 	expect(wechatModel).toEqual(expect.objectContaining({
 		modelKind: 'valueObject'
 	}))
-	
 	const personModel = models.find(propEq('name', 'Person'))
 	const wechatField = personModel.fields.find(propEq('name', 'wechat'))
 	const wechatsField = personModel.fields.find(propEq('name', 'wechats'))
@@ -201,4 +182,22 @@ test('valueObject should be ok', async () => {
 		graphqlizeType: 'Wechat',
 		sequelizeType: Sequelize.JSONB
 	}))
+})
+
+test('isUnique should work(id should automatically have @isUnique)', async () => {
+	const types = [`
+	type Person {
+		id: ID
+		name: String @isUnique
+		age: String
+	}
+	`]
+	const [model] = await getModelsFromTypes(types)
+	const idField = model.fields.find(propEq('name', 'id'))
+	const nameField = model.fields.find(propEq('name', 'name'))
+	const ageField = model.fields.find(propEq('name', 'age'))
+	
+	expect(idField.isUnique).toEqual(true)
+	expect(nameField.isUnique).toEqual(true)
+	expect(ageField.isUnique).toEqual(false)
 })

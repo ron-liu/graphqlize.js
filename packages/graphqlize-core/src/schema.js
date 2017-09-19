@@ -11,8 +11,8 @@ import {TYPE_KIND} from './constants'
 const systemSchema : Schema = {
 	types: [
 		`enum OrderDirectionEnum { Asc Desc }`,
-		`type _QueryMeta @noTable {count: Int!}`,
-		`type File @noTable {
+		`type _QueryMeta @valueObject {count: Int!}`,
+		`type File @valueObject {
 			id: ID!
 			name: String!
 			createdAt: DateTime

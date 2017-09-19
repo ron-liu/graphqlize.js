@@ -1,7 +1,7 @@
 import {
 	taskTry, applySpec, Box, prop, propEq, pipe, filter, evolve, map, path, taskOf, I, curry, concat, keys,
 	pathSatisfies, isNil, not, both, pathEq, either, equals, propFn, when, ifElse, propSatisfies, K, any, find, all,
-	notEquals, tap, __, contains, converge, assoc, merge
+	notEquals, tap, __, contains, converge, assoc, merge, over, lensProp
 } from "./util";
 import {Kind} from 'graphql'
 import {CustomScalars} from './types'
@@ -9,6 +9,7 @@ import Sequelize from 'sequelize'
 import type {Field, SequelizeType} from "./types";
 import type {Fn1} from "./basic-types";
 import {TYPE_KIND} from "./constants";
+import {printJson} from "./util/misc";
 
 const getName = path(['name', 'value'])
 const getValue = path(['value', 'value'])
@@ -89,6 +90,17 @@ export const getModels = (ast, option) => taskTry(() => {
 		return customScalars[field.graphqlizeType].sequelizeType
 	}
 	
+	const getDirectives = map(applySpec({
+		name: getName,
+		arguments: pipe(
+			prop('arguments'),
+			map(applySpec({
+				name: getName,
+				value: getValue
+			}))
+		)
+	}))
+	
 	const systemFields = [
 		{
 			name: 'createdAt',
@@ -99,7 +111,8 @@ export const getModels = (ast, option) => taskTry(() => {
 			primaryKey: false,
 			isList: false,
 			allowNull: true,
-			isSystemField: true
+			isSystemField: true,
+			isUnique: false,
 		} ,
 		{
 			name: 'updatedAt',
@@ -110,26 +123,19 @@ export const getModels = (ast, option) => taskTry(() => {
 			primaryKey: false,
 			isList: false,
 			allowNull: true,
-			isSystemField: true
+			isSystemField: true,
+			isUnique: false,
 		}
 	]
 	
 	return Box(ast)
 		.map(prop('definitions'))
 		.map(filter(isKind('ObjectTypeDefinition')))
+		.map(map(over(lensProp('fields'), map(over(lensProp('directives'), getDirectives)))))
 		.map(map(applySpec({
 			name: getName,
 			interfaces: propFn('interfaces', map(getName)),
-			directives: propFn('directives', map(applySpec({
-				name: getName,
-				arguments: pipe(
-					prop('arguments'),
-					map(applySpec({
-						name: getName,
-						value: getValue
-					}))
-				)
-			}))),
+			directives: propFn('directives', getDirectives),
 			modelKind: pipe(
 				propFn('directives', map(getName)),
 				find(either(equals('valueObject'), equals('outSourcing'))),
@@ -146,6 +152,10 @@ export const getModels = (ast, option) => taskTry(() => {
 							),
 							not
 						)),
+						isUnique: either(
+							propFn('directives', any(propEq('name', 'isUnique'))),
+							pipe(getName, equals('id'))
+						),
 						isList: propFn('type', isList),
 						allowNull: propFn('type', pipe(stripeList, isKind(Kind.NON_NULL_TYPE), not)),
 						isSystemField: K(false),
@@ -158,5 +168,6 @@ export const getModels = (ast, option) => taskTry(() => {
 				concat(systemFields)
 			))
 		})))
+		.map(tap(printJson))
 		.fold(I)
 })
