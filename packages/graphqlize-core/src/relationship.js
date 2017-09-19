@@ -40,7 +40,7 @@ const validateRelationName = pipe(
 )
 
 // Ast -> [Type]
-const getPersistentTypes = pipe(
+const getPersistenceTypes = pipe(
 	prop('definitions'),
 	filter(propEq('kind', 'ObjectTypeDefinition')),
 	reject(propSatisfies(any(pathSatisfies(contains(__, [TYPE_KIND.OUT_SOURCING, TYPE_KIND.VALUE_OBJECT]), ['name', 'value'])),  'directives')),
@@ -100,7 +100,7 @@ const generateRelationship = applySpec({
 
 // Ast -> Validation.Failure | Result.Ok relationships
 export const getRelationshipsFromAst = ast => taskOf(ast) // Ok ast
-	.map(getPersistentTypes)    // Ok [AstType]
+	.map(getPersistenceTypes)    // Ok [AstType]
 	.map(filterTypesFieldsWithRelationDirective) // Ok [AstType]
 	.chain(extractTypesFields)
 	.map(groupWith((a, b) => a.relationName === b.relationName)) // Failure [error] | Success [ [Field, Field] ]

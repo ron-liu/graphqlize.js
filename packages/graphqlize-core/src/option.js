@@ -38,7 +38,7 @@ const validators = [
 	schemaTypesIsRequired,
 	connectionOptionDialectIsRequired,
 	coreOptionIsRequired
-	//todo: only persistent type's field can set @relation directive
+	//todo: only persistence type's field can set @relation directive
 ]
 
 // GraphqlizeOption -> Task GraphqlizeOption

@@ -7,7 +7,7 @@ test('whole should work', async () => {
 			types: [
 				`
 				interface Saas {post: Post}
-				type Post @persistent {
+				type Post @persistence {
 					content: String
 				}
 				type Comment implements Saas {

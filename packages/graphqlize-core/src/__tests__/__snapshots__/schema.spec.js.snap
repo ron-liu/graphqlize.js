@@ -1,6 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`simple models inputs should ok 1`] = `
+exports[`inputs should ok 1`] = `
+Array [
+  "input CreatePersonInput {createdAt:DateTime updatedAt:DateTime id:ID name:String histories:[HistoryInput!] latestHistory:HistoryInput}",
+  "input DeletePersonInput {id:ID!}",
+  "input UpdatePersonInput {createdAt:DateTime updatedAt:DateTime id:ID! name:String histories:[HistoryInput!] latestHistory:HistoryInput}",
+  "input UpsertPersonInput {createdAt:DateTime updatedAt:DateTime id:ID name:String histories:[HistoryInput!] latestHistory:HistoryInput}",
+  "input HistoryInput {createdAt:DateTime updatedAt:DateTime id:ID name:String}",
+]
+`;
+
+exports[`inputs should ok 2`] = `
+Array [
+  "input CreatePersonInput {createdAt:DateTime updatedAt:DateTime id:ID name:String histories:[CreateHistoryInput!] latestHistory:CreateHistoryInput}",
+  "input DeletePersonInput {id:ID!}",
+  "input UpdatePersonInput {createdAt:DateTime updatedAt:DateTime id:ID! name:String histories:[UpsertHistoryInput!] latestHistory:UpsertHistoryInput}",
+  "input UpsertPersonInput {createdAt:DateTime updatedAt:DateTime id:ID name:String histories:[UpsertHistoryInput!] latestHistory:UpsertHistoryInput}",
+  "input CreateHistoryInput {createdAt:DateTime updatedAt:DateTime id:ID name:String}",
+  "input DeleteHistoryInput {id:ID!}",
+  "input UpdateHistoryInput {createdAt:DateTime updatedAt:DateTime id:ID! name:String}",
+  "input UpsertHistoryInput {createdAt:DateTime updatedAt:DateTime id:ID name:String}",
+]
+`;
+
+exports[`inputs should ok 3`] = `
 Array [
   "input CreatePersonInput {createdAt:DateTime updatedAt:DateTime id:ID name:String}",
   "input DeletePersonInput {id:ID!}",

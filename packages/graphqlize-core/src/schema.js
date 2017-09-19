@@ -1,7 +1,12 @@
 import type {GraphqlizeOption, Schema, Model, Field, GenModelInputOption, Action} from './types'
 import type {Fn1, Fn2, Fn3} from 'basic-types'
-import {flatten, mergeWith, over, concat, lensProp, Box, prop, map, when, K, pipe, __, either, capitalize, join, tap} from "./util";
+import {
+	flatten, mergeWith, over, concat, lensProp, Box, prop, map, when, K, pipe, __, either, capitalize, join, tap,
+	propEq, ifElse, filter
+} from "./util";
 import {List} from 'immutable-ext'
+import type {CurriedFn2} from "./basic-types";
+import {TYPE_KIND} from './constants'
 
 const systemSchema : Schema = {
 	types: [
@@ -26,7 +31,10 @@ const getFieldInput : Fn1< Action, Fn1<Field, string>>
 = action => field => {
 	const {fieldKind, graphqlizeType} = field
 	if (fieldKind === 'valueObject') return Box(graphqlizeType).map(capitalize).fold(concat(__, 'Input'))
-	if (fieldKind === 'relation') return Box(graphqlizeType).map(capitalize).map(concat(capitalize(action))).fold(concat(__, 'Input'))
+	if (fieldKind === 'relation') return Box(graphqlizeType)
+		.map(capitalize)
+		.map(concat(capitalize(action === 'create' ? 'create': 'upsert')))
+		.fold(concat(__, 'Input'))
 	return graphqlizeType
 }
 
@@ -60,13 +68,21 @@ const genCreateModelInput = genModelInput({allowIdNull: true, allowFieldsOtherTh
 const genUpdateModelInput = genModelInput({allowIdNull: false, allowFieldsOtherThanIdNull: true, action: 'update'})
 const genUpsertModelInput = genModelInput({allowIdNull: true, allowFieldsOtherThanIdNull: true, action: 'upsert'})
 const genDeleteModelInput : Fn1<Model, string> = model => buildInput('delete', model, ['id:ID!'])
+const genValueObjectInput = genModelInput({allowIdNull: true, allowFieldsOtherThanIdNull: true, action: ''})
 
-const genModelInputs : Fn1<Model, [string]>
+const genPersistenceModelInputs : Fn1<Model, [string]>
 = model => List.of(genCreateModelInput, genDeleteModelInput, genUpdateModelInput, genUpsertModelInput)
 	.ap(List.of(model))
 	.toArray()
 
+const genValueObjectModelInputs : Fn1<Model, [string]>
+= model => List.of(genValueObjectInput)
+	.ap(List.of(model))
+	.toArray()
+
+const isModelKind: CurriedFn2<string, Model, boolean> = propEq('modelKind')
 export const genModelsInputs: Fn1<[Model], [string]>
 = models => Box(models)
-	.map(map(genModelInputs))
+	.map(filter(either(isModelKind(TYPE_KIND.VALUE_OBJECT), isModelKind(TYPE_KIND.PERSISTENCE))))
+	.map(map(ifElse(isModelKind(TYPE_KIND.PERSISTENCE), genPersistenceModelInputs, genValueObjectInput)))
 	.fold(flatten)

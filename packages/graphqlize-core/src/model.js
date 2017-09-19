@@ -8,6 +8,7 @@ import {CustomScalars} from './types'
 import Sequelize from 'sequelize'
 import type {Field, SequelizeType} from "./types";
 import type {Fn1} from "./basic-types";
+import {TYPE_KIND} from "./constants";
 
 const getName = path(['name', 'value'])
 const getValue = path(['value', 'value'])
@@ -62,7 +63,7 @@ export const getModels = (ast, option) => taskTry(() => {
 	.map(filter(propFn('directives', pipe(map(getName), any(equals('valueObject'))))))
 	.fold(map(getName))
 	
-	const allPersistentObjectTypes = Box(ast)
+	const allPersistenceObjectTypes = Box(ast)
 	.map(prop('definitions'))
 	.map(filter(isKind('ObjectTypeDefinition')))
 	.map(filter(propFn('directives', pipe(
@@ -75,7 +76,7 @@ export const getModels = (ast, option) => taskTry(() => {
 		if(contains(typeName, allCustomScalarNames)) return 'scalar'
 		else if(contains(typeName, allEnumNames)) return 'enum'
 		else if(contains(typeName, allValueObjectTypes)) return 'valueObject'
-		else if(contains(typeName, allPersistentObjectTypes)) return 'relation'
+		else if(contains(typeName, allPersistenceObjectTypes)) return 'relation'
 		
 		return undefined
 	}
@@ -132,7 +133,7 @@ export const getModels = (ast, option) => taskTry(() => {
 			modelKind: pipe(
 				propFn('directives', map(getName)),
 				find(either(equals('valueObject'), equals('outSourcing'))),
-				when(isNil, K('persistent'))
+				when(isNil, K(TYPE_KIND.PERSISTENCE))
 			),
 			fields: propFn('fields', pipe(
 				map(pipe(
