@@ -1,5 +1,6 @@
 import {getModelsFromTypes, createSequelize} from './shared'
 import {defineSequelizeModels, sync} from '../db'
+import {promiseToTask} from "../util/hkt";
 
 test('isUnique should work', async () => {
 	const types = [`
@@ -12,16 +13,11 @@ test('isUnique should work', async () => {
 	const sequelize = createSequelize()
 	
 	await defineSequelizeModels(sequelize, models)
-		// .chain(() => sync({connection: {option: {sync: {force: true}}}}, sequelize))
+		.chain(() => sync({connection: {option: {sync: {force: true}}}}, sequelize))
 		.run()
 		.promise()
-	await sequelize.sync({force: true}) // should allow l15 to work
 	await sequelize.model('Person').create({name: 'ron'})
-	try {
-		await sequelize.model('Person').create({name: 'ron'})
-		fail('should NOT allow to create same one')
-	}
-	catch(e) {
-	
-	}
+	await expect(sequelize.model('Person').create({name: 'ron'}))
+		.rejects
+		.toMatchSnapshot()
 })

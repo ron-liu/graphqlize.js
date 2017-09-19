@@ -1,7 +1,6 @@
 import {
 	of as taskOf,
 	rejected as taskRejected,
-	fromPromised as promiseToTask,
 	do as taskDo,
 	task,
 	waitAll as taskAll
@@ -28,4 +27,8 @@ export const taskTry = fn => {
 	}
 }
 
-export {taskOf, taskRejected, promiseToTask, taskDo, task, taskAll}
+export const promiseToTask = promise => task(
+	({resolve, reject}) => promise.then(resolve).catch(reject)
+)
+
+export {taskOf, taskRejected, taskDo, task, taskAll}
