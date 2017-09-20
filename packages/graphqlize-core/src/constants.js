@@ -3,3 +3,10 @@ export const TYPE_KIND = {
 	PERSISTENCE: 'persistence',
 	OUT_SOURCING: 'outSourcing'
 }
+
+export const FIELD_KIND = {
+	VALUE_OBJECT: 'valueObject',
+	SCALAR: 'scalar',
+	ENUM: 'enum',
+	RELATION: 'relation'
+}

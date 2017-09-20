@@ -37,5 +37,11 @@
     "plugins": [
       "transform-object-rest-spread"
     ]
+  },
+  "jest": {
+    "verbose": true,
+    "testMatch": [
+      "**/__tests__/*.spec.js"
+    ]
   }
 }

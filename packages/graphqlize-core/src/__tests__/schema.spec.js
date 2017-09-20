@@ -19,8 +19,8 @@ const schemas = [
 		`type Person {
 			id:ID
 			name:String
-			histories: [History!]
-			latestHistory: History
+			v_histories: [History!]
+			v_latestHistory: History
 		}`,
 		`type History @valueObject { id:ID name:String }`,
 	],

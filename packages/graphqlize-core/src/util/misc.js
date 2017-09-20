@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize'
-import {converge, pipe, head, toUpper, tail, concat} from './functions'
+import {converge, pipe, head, toUpper, tail, concat, join} from './functions'
 
 export const printJson = x => console.log(JSON.stringify(x, null, '\t'))
 
@@ -26,3 +26,5 @@ export const capitalize: (word: string) => string = converge(
 		tail
 	]
 )
+
+export const joinGraphqlItems = join(', ')
