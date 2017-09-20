@@ -156,5 +156,5 @@ const isModelKind: CurriedFn2<string, Model, boolean> = propEq('modelKind')
 export const genModelsInputs: Fn1<[Model], [string]>
 = models => Box(models)
 	.map(filter(either(isModelKind(TYPE_KIND.VALUE_OBJECT), isModelKind(TYPE_KIND.PERSISTENCE))))
-	.map(map(ifElse(isModelKind(TYPE_KIND.PERSISTENCE), genPersistenceModelInputs, genValueObjectInput)))
+	.map(map(ifElse(isModelKind(TYPE_KIND.PERSISTENCE), genPersistenceModelInputs, genValueObjectModelInputs)))
 	.fold(flatten)
