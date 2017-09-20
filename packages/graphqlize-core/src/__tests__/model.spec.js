@@ -1,6 +1,7 @@
 import {propEq} from '../util'
 import Sequelize from 'sequelize'
 import {getModelsFromTypes} from './shared'
+import {FIELD_KIND, TYPE_KIND} from "../constants";
 
 test('model should be ok', async () => {
 	const types = [`
@@ -67,7 +68,7 @@ test('scalar should be ok', async () => {
 		primaryKey: true,
 		allowNull: false,
 		isSystemField: false,
-		fieldKind: 'scalar',
+		fieldKind: FIELD_KIND.SCALAR,
 		graphqlType: 'ID',
 		sequelizeType: Sequelize.UUID
 	}))
@@ -78,7 +79,7 @@ test('scalar should be ok', async () => {
 		primaryKey: false,
 		allowNull: true,
 		isSystemField: false,
-		fieldKind: 'scalar',
+		fieldKind: FIELD_KIND.SCALAR,
 		graphqlType: 'String',
 		sequelizeType: Sequelize.STRING
 		
@@ -89,7 +90,7 @@ test('scalar should be ok', async () => {
 		primaryKey: false,
 		allowNull: true,
 		isSystemField: false,
-		fieldKind: 'scalar',
+		fieldKind: FIELD_KIND.SCALAR,
 		graphqlType: 'String',
 		sequelizeType: Sequelize.JSONB
 		
@@ -118,7 +119,7 @@ test('enum should be ok', async () => {
 		primaryKey: false,
 		allowNull: true,
 		isSystemField: false,
-		fieldKind: 'enum',
+		fieldKind: FIELD_KIND.ENUM,
 		graphqlType: 'PersonStatus',
 		sequelizeType: Sequelize.STRING
 	}))
@@ -129,7 +130,7 @@ test('enum should be ok', async () => {
 		primaryKey: false,
 		allowNull: true,
 		isSystemField: false,
-		fieldKind: 'enum',
+		fieldKind: FIELD_KIND.ENUM,
 		graphqlType: 'PersonStatus',
 		sequelizeType: Sequelize.JSONB
 	}))
@@ -149,7 +150,7 @@ test('valueObject should be ok', async () => {
 	
 	const wechatModel = models.find(propEq('name', 'Wechat'))
 	expect(wechatModel).toEqual(expect.objectContaining({
-		modelKind: 'valueObject'
+		modelKind: TYPE_KIND.VALUE_OBJECT
 	}))
 	const personModel = models.find(propEq('name', 'Person'))
 	const wechatField = personModel.fields.find(propEq('name', 'wechat'))
@@ -160,7 +161,7 @@ test('valueObject should be ok', async () => {
 		primaryKey: false,
 		allowNull: true,
 		isSystemField: false,
-		fieldKind: 'valueObject',
+		fieldKind: FIELD_KIND.VALUE_OBJECT,
 		graphqlType: 'Wechat',
 		sequelizeType: Sequelize.JSONB
 	}))
@@ -170,7 +171,7 @@ test('valueObject should be ok', async () => {
 		primaryKey: false,
 		allowNull: true,
 		isSystemField: false,
-		fieldKind: 'valueObject',
+		fieldKind: FIELD_KIND.VALUE_OBJECT,
 		graphqlType: 'Wechat',
 		sequelizeType: Sequelize.JSONB
 	}))

@@ -31,8 +31,8 @@ export const mergeSystemSchema : Fn1<GraphqlizeOption, GraphqlizeOption> =
 const getFieldInput : Fn1< Action, Fn1<Field, string>>
 = action => field => {
 	const {fieldKind, graphqlType} = field
-	if (fieldKind === 'valueObject') return Box(graphqlType).map(capitalize).fold(concat(__, 'Input'))
-	if (fieldKind === 'relation') return Box(graphqlType)
+	if (fieldKind === FIELD_KIND.VALUE_OBJECT) return Box(graphqlType).map(capitalize).fold(concat(__, 'Input'))
+	if (fieldKind === FIELD_KIND.RELATION) return Box(graphqlType)
 		.map(capitalize)
 		.map(concat(capitalize(action === 'create' ? 'create': 'upsert')))
 		.fold(concat(__, 'Input'))
@@ -118,10 +118,10 @@ const getModelFilter : Fn1<Model, string> = model => Box(model)
 	.map(prop('fields'))
 	.map(map(field => {
 		switch (field.fieldKind) {
-			case 'relation': return buildRelationColumnFilter(field)
-			case 'scalar':
-			case 'enum': return buildScalarAndEnumColumnFilter(field)
-			case 'valueObject': return buildValueObjectColumnFilter(field)
+			case FIELD_KIND.RELATION: return buildRelationColumnFilter(field)
+			case FIELD_KIND.SCALAR:
+			case FIELD_KIND.ENUM: return buildScalarAndEnumColumnFilter(field)
+			case FIELD_KIND.VALUE_OBJECT: return buildValueObjectColumnFilter(field)
 			default: return []
 		}
 	}))

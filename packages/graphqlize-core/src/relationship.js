@@ -6,7 +6,7 @@ import {
 	all, contains, forEach, find, gt, head, length, last, reject, reduce, Box, pathSatisfies, of, isEmpty,
 	taskOf, set, lensPath, groupBy, values
 } from './util'
-import {TYPE_KIND} from './constants'
+import {FIELD_KIND, TYPE_KIND} from './constants'
 import {Failure, Success, collect} from 'folktale/validation'
 import Result from 'folktale/result'
 import {taskTry, validationToTask} from "./util/hkt";
@@ -50,7 +50,7 @@ const getPersistenceTypes = pipe(
 
 const filterTypesFieldsWithRelationDirective = astTypes => astTypes
 	.map(over(lensProp('fields'), filter(
-		propSatisfies(any(pathEq(['name', 'value'], 'relation')),  'directives')
+		propSatisfies(any(pathEq(['name', 'value'], FIELD_KIND.RELATION)),  'directives')
 	)))
 	.filter(propSatisfies(pipe(isEmpty, not), 'fields'))
 
@@ -63,7 +63,7 @@ const extractTypeFields = astType => Box(astType) // Result [AstType]
 			type: getBaseTypeFromField,
 			isList: isFieldList,
 			relationName: field => Box(field.directives)
-				.map(find(pathEq(['name', 'value'], 'relation')))
+				.map(find(pathEq(['name', 'value'], FIELD_KIND.RELATION)))
 				.map(prop('arguments'))
 				.map(find(pathEq(['name', 'value'], 'name')))
 				.map(path(['value', 'value']))

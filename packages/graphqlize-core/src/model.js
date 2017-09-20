@@ -8,7 +8,7 @@ import {CustomScalars} from './types'
 import Sequelize from 'sequelize'
 import type {Field, SequelizeType} from "./types";
 import type {Fn1} from "./basic-types";
-import {TYPE_KIND} from "./constants";
+import {FIELD_KIND, TYPE_KIND} from "./constants";
 import {printJson} from "./util/misc";
 
 const getName = path(['name', 'value'])
@@ -61,7 +61,7 @@ export const getModels = (ast, option) => taskTry(() => {
 	const allValueObjectTypes = Box(ast)
 	.map(prop('definitions'))
 	.map(filter(isKind('ObjectTypeDefinition')))
-	.map(filter(propFn('directives', pipe(map(getName), any(equals('valueObject'))))))
+	.map(filter(propFn('directives', pipe(map(getName), any(equals(TYPE_KIND.VALUE_OBJECT))))))
 	.fold(map(getName))
 	
 	const allPersistenceObjectTypes = Box(ast)
@@ -69,24 +69,24 @@ export const getModels = (ast, option) => taskTry(() => {
 	.map(filter(isKind('ObjectTypeDefinition')))
 	.map(filter(propFn('directives', pipe(
 		map(getName),
-		all(both(notEquals('valueObject'), notEquals('outSourcing')))
+		all(both(notEquals(TYPE_KIND.VALUE_OBJECT), notEquals(TYPE_KIND.OUT_SOURCING)))
 	))))
 	.fold(map(getName))
 	
 	const fieldTypeToFieldKind = ast => typeName => {
-		if(contains(typeName, allCustomScalarNames)) return 'scalar'
-		else if(contains(typeName, allEnumNames)) return 'enum'
-		else if(contains(typeName, allValueObjectTypes)) return 'valueObject'
-		else if(contains(typeName, allPersistenceObjectTypes)) return 'relation'
+		if(contains(typeName, allCustomScalarNames)) return FIELD_KIND.SCALAR
+		else if(contains(typeName, allEnumNames)) return FIELD_KIND.ENUM
+		else if(contains(typeName, allValueObjectTypes)) return FIELD_KIND.VALUE_OBJECT
+		else if(contains(typeName, allPersistenceObjectTypes)) return FIELD_KIND.RELATION
 		
 		return undefined
 	}
 	
 	const getSequelizeType : Fn1<Field, SequelizeType> = field => {
-		if (field.fieldKind === 'relation') return undefined
+		if (field.fieldKind === FIELD_KIND.RELATION) return undefined
 		if (field.isList) return Sequelize.JSONB
-		if (field.fieldKind === 'enum') return Sequelize.STRING
-		if (field.fieldKind === 'valueObject') return Sequelize.JSONB
+		if (field.fieldKind === FIELD_KIND.ENUM) return Sequelize.STRING
+		if (field.fieldKind === FIELD_KIND.VALUE_OBJECT) return Sequelize.JSONB
 		return customScalars[field.graphqlType].sequelizeType
 	}
 	
@@ -138,7 +138,7 @@ export const getModels = (ast, option) => taskTry(() => {
 			directives: propFn('directives', getDirectives),
 			modelKind: pipe(
 				propFn('directives', map(getName)),
-				find(either(equals('valueObject'), equals('outSourcing'))),
+				find(either(equals(TYPE_KIND.VALUE_OBJECT), equals(TYPE_KIND.OUT_SOURCING))),
 				when(isNil, K(TYPE_KIND.PERSISTENCE))
 			),
 			fields: propFn('fields', pipe(
