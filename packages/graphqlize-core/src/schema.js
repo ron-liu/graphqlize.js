@@ -30,13 +30,13 @@ export const mergeSystemSchema : Fn1<GraphqlizeOption, GraphqlizeOption> =
 
 const getFieldInput : Fn1< Action, Fn1<Field, string>>
 = action => field => {
-	const {fieldKind, graphqlizeType} = field
-	if (fieldKind === 'valueObject') return Box(graphqlizeType).map(capitalize).fold(concat(__, 'Input'))
-	if (fieldKind === 'relation') return Box(graphqlizeType)
+	const {fieldKind, graphqlType} = field
+	if (fieldKind === 'valueObject') return Box(graphqlType).map(capitalize).fold(concat(__, 'Input'))
+	if (fieldKind === 'relation') return Box(graphqlType)
 		.map(capitalize)
 		.map(concat(capitalize(action === 'create' ? 'create': 'upsert')))
 		.fold(concat(__, 'Input'))
-	return graphqlizeType
+	return graphqlType
 }
 
 const buildInput : Fn3<Action, Model, [string], string>
@@ -44,7 +44,7 @@ const buildInput : Fn3<Action, Model, [string], string>
 
 const getInputField: Fn1<GenModelInputOption, Fn1<Field, string>>
 = ({allowIdNull, allowFieldsOtherThanIdNull, action}) => field => {
-	const {name, isList, allowNullList, allowNull, fieldKind, graphqlizeType} = field
+	const {name, isList, allowNullList, allowNull, fieldKind, graphqlType} = field
 	return Box(field)
 		.map(getFieldInput(action))
 		.map(when(
@@ -81,25 +81,25 @@ export const queryOperators = {
 
 const getModelFilterName : Fn1<string, string> = typeName => `${capitalize(typeName)}Filter`
 const buildScalarAndEnumColumnFilter : Fn1<Field, [string]> = field => {
-	const {name, graphqlizeType} = field
+	const {name, graphqlType} = field
 	return Box(queryOperators)
 		.map(ifElse(
-			K(graphqlizeType === 'ID'),
+			K(graphqlType === 'ID'),
 			K([]),
 			pipe(
-				mapObjIndexed((getType, opName) => `${name}_${opName}:${getType(graphqlizeType)}`),
+				mapObjIndexed((getType, opName) => `${name}_${opName}:${getType(graphqlType)}`),
 				values
 			)
 		))
-		.fold(concat([`${name}:${graphqlizeType}`]))
+		.fold(concat([`${name}:${graphqlType}`]))
 }
 const buildValueObjectColumnFilter: Fn1<Field, [string]> = field => []
 const buildRelationColumnFilter: Fn1<Field, [string]> = field => Box(field)
 	.fold(ifElse(
 		prop('isList'),
-		K(['every', 'some', 'none'].map(x => `${field.name}_${x}:${getModelFilterName(field.graphqlizeType)}`)),
+		K(['every', 'some', 'none'].map(x => `${field.name}_${x}:${getModelFilterName(field.graphqlType)}`)),
 		K([
-			`${field.name}:${getModelFilterName(field.graphqlizeType)}`,
+			`${field.name}:${getModelFilterName(field.graphqlType)}`,
 			`${field.name}Id:ID`
 		])
 	))

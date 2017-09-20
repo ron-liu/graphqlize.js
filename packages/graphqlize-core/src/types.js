@@ -84,7 +84,7 @@ export type Field = {
 	allowNull: boolean,
 	isSystemField: boolean,
 	isUnique: boolean,
-	graphqlizeType: string,
+	graphqlType: string,
 	sequelizeType: SequelizeType,
 	fieldKind: 'scalar' | 'enum' | 'valueObject' | 'relation'
 }

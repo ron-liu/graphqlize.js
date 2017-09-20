@@ -32,7 +32,7 @@ const stripeList = pipe(
 	)
 )
 
-const getGraphqlizeType = propFn('type', pipe(
+const getGraphqlType = propFn('type', pipe(
 	stripeList,
 	when(isKind(Kind.NON_NULL_TYPE), prop('type')),
 	getName
@@ -87,7 +87,7 @@ export const getModels = (ast, option) => taskTry(() => {
 		if (field.isList) return Sequelize.JSONB
 		if (field.fieldKind === 'enum') return Sequelize.STRING
 		if (field.fieldKind === 'valueObject') return Sequelize.JSONB
-		return customScalars[field.graphqlizeType].sequelizeType
+		return customScalars[field.graphqlType].sequelizeType
 	}
 	
 	const getDirectives = map(applySpec({
@@ -106,7 +106,7 @@ export const getModels = (ast, option) => taskTry(() => {
 			name: 'createdAt',
 			allowNullList: true,
 			fieldKind: "scalar",
-			graphqlizeType: 'DateTime',
+			graphqlType: 'DateTime',
 			sequelizeType: Sequelize.DATE,
 			primaryKey: false,
 			isList: false,
@@ -118,7 +118,7 @@ export const getModels = (ast, option) => taskTry(() => {
 			name: 'updatedAt',
 			allowNullList: true,
 			fieldKind: "scalar",
-			graphqlizeType: 'DateTime',
+			graphqlType: 'DateTime',
 			sequelizeType: Sequelize.DATE,
 			primaryKey: false,
 			isList: false,
@@ -159,8 +159,8 @@ export const getModels = (ast, option) => taskTry(() => {
 						isList: propFn('type', isList),
 						allowNull: propFn('type', pipe(stripeList, isKind(Kind.NON_NULL_TYPE), not)),
 						isSystemField: K(false),
-						graphqlizeType: getGraphqlizeType,
-						fieldKind: pipe(getGraphqlizeType, fieldTypeToFieldKind(ast)),
+						graphqlType: getGraphqlType,
+						fieldKind: pipe(getGraphqlType, fieldTypeToFieldKind(ast)),
 						primaryKey: pipe(getName, equals('id'))
 					}),
 					field => ({...field, sequelizeType: getSequelizeType(field)})

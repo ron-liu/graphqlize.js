@@ -68,7 +68,7 @@ test('scalar should be ok', async () => {
 		allowNull: false,
 		isSystemField: false,
 		fieldKind: 'scalar',
-		graphqlizeType: 'ID',
+		graphqlType: 'ID',
 		sequelizeType: Sequelize.UUID
 	}))
 	
@@ -79,7 +79,7 @@ test('scalar should be ok', async () => {
 		allowNull: true,
 		isSystemField: false,
 		fieldKind: 'scalar',
-		graphqlizeType: 'String',
+		graphqlType: 'String',
 		sequelizeType: Sequelize.STRING
 		
 	}))
@@ -90,7 +90,7 @@ test('scalar should be ok', async () => {
 		allowNull: true,
 		isSystemField: false,
 		fieldKind: 'scalar',
-		graphqlizeType: 'String',
+		graphqlType: 'String',
 		sequelizeType: Sequelize.JSONB
 		
 	}))
@@ -119,7 +119,7 @@ test('enum should be ok', async () => {
 		allowNull: true,
 		isSystemField: false,
 		fieldKind: 'enum',
-		graphqlizeType: 'PersonStatus',
+		graphqlType: 'PersonStatus',
 		sequelizeType: Sequelize.STRING
 	}))
 	
@@ -130,7 +130,7 @@ test('enum should be ok', async () => {
 		allowNull: true,
 		isSystemField: false,
 		fieldKind: 'enum',
-		graphqlizeType: 'PersonStatus',
+		graphqlType: 'PersonStatus',
 		sequelizeType: Sequelize.JSONB
 	}))
 })
@@ -161,7 +161,7 @@ test('valueObject should be ok', async () => {
 		allowNull: true,
 		isSystemField: false,
 		fieldKind: 'valueObject',
-		graphqlizeType: 'Wechat',
+		graphqlType: 'Wechat',
 		sequelizeType: Sequelize.JSONB
 	}))
 	expect(wechatsField).toEqual(expect.objectContaining({
@@ -171,7 +171,7 @@ test('valueObject should be ok', async () => {
 		allowNull: true,
 		isSystemField: false,
 		fieldKind: 'valueObject',
-		graphqlizeType: 'Wechat',
+		graphqlType: 'Wechat',
 		sequelizeType: Sequelize.JSONB
 	}))
 })
