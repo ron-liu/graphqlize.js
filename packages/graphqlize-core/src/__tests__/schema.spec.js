@@ -1,40 +1,93 @@
 import {getModels} from '../model'
 import {getAst} from '../ast'
-import {genModelsInputs} from '../schema'
+import {genModelsInputs, schemaToString} from '../schema'
 import {taskOf, tap} from '../util'
 import {List} from 'immutable-ext'
 
-const schemas = [
-	[`type Person { id: ID name: String }`],
-	[
-		`type Person {
+describe ('types to inputs', () => {
+	const types = [
+		[`type Person { id: ID name: String }`],
+		[
+			`type Person {
 			id:ID
 			name:String
 			histories: [History!] @relation(name: "PersonHistories")
 			latestHistory: History @relation(name: "PersonHistory")
 		}`,
-		`type History { id:ID name:String }`,
-	],
-	[
-		`type Person {
+			`type History { id:ID name:String }`,
+		],
+		[
+			`type Person {
 			id:ID
 			name:String
 			v_histories: [History!]
 			v_latestHistory: History
 		}`,
-		`type History @valueObject { id:ID name:String }`,
-	],
+			`type History @valueObject { id:ID name:String }`,
+		],
 	
-]
+	]
+	
+	test('inputs should ok', async () => {
+		await List(types)
+			.map(types => ({schema: {types}, customScalar: []}))
+			.traverse(taskOf, option => getAst(option)
+				.chain(x=>getModels(x, option))
+				.map(genModelsInputs)
+				.map(tap(console.log))
+				.map(inputs => expect(inputs).toMatchSnapshot())
+			).run().promise()
+		
+	})
+})
 
-test('inputs should ok', async () => {
-	await List(schemas)
-		.map(types => ({schema: {types}, customScalar: []}))
-		.traverse(taskOf, option => getAst(option)
-			.chain(x=>getModels(x, option))
-			.map(genModelsInputs)
-			.map(tap(console.log))
-			.map(inputs => expect(inputs).toMatchSnapshot())
-		).run().promise()
-	
+describe('schema to string', () => {
+	const schemas = [
+		{
+			types: [
+				`type Post {name: String}`
+			],
+			queries: [
+				`posts(id:ID, name:String):[Post]`,
+				`post(id:ID):Post`
+			],
+			mutations: [
+				`createPost(name:String):Post`,
+				`updatePost(id:ID, name:String):Post`
+			]
+		},
+		{
+			types: [
+				`type Post {name: String}`
+			],
+			queries: [
+				`posts(id:ID, name:String):[Post]`,
+				`post(id:ID):Post`
+			],
+			
+		},
+		{
+			types: [
+				`type Post {name: String}`
+			],
+			mutations: [
+				`createPost(name:String):Post`,
+				`updatePost(id:ID, name:String):Post`
+			]
+			
+		},
+		{
+			types: [
+				`type Post {name: String}`
+			]
+		}
+	]
+	test('should ok', async () => {
+		await List(schemas)
+			.traverse(taskOf,  schema => schemaToString(schema)
+				.map(tap(console.log))
+				.map(s => expect(s).toMatchSnapshot())
+			).run().promise()
+		
+	})
 })

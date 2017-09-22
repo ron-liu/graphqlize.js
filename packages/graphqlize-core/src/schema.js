@@ -6,8 +6,10 @@ import {
 } from "./util"
 import {List} from 'immutable-ext'
 import {FIELD_KIND, TYPE_KIND} from './constants'
-import {mapObjIndexed} from "ramda";
+import {applySpec, converge, isNil, mapObjIndexed} from "ramda";
 import {joinGraphqlItems} from "./util/misc";
+import {taskTry} from "./util/hkt";
+import {propFn} from "./util/functions";
 
 const systemSchema : Schema = {
 	types: [
@@ -159,3 +161,29 @@ export const genModelsInputs: Fn1<[Model], [string]>
 	.map(filter(either(isModelKind(TYPE_KIND.VALUE_OBJECT), isModelKind(TYPE_KIND.PERSISTENCE))))
 	.map(map(ifElse(isModelKind(TYPE_KIND.PERSISTENCE), genPersistenceModelInputs, genValueObjectModelInputs)))
 	.fold(flatten)
+
+export const schemaToString: Fn1<Schema, string> = schema => taskTry(
+	() => {
+		const arrayToString = xs => Box(xs)
+			.map(when(isNil, K([])))
+			.fold(join('\n'))
+		
+		return List.of(
+			propFn('types', arrayToString),
+			pipe(
+				propFn('queries', arrayToString),
+				x => `type Query {\n${x}\n}`
+			),
+			pipe(
+				propFn('mutations', arrayToString),
+				x => `type Mutation {\n${x}\n}`
+			),
+			converge(
+				(hasQueries, hasMutations) => `schema { ${hasQueries ? 'query:Query' : ''} ${hasMutations ? 'mutation:Mutation' : ''} }`,
+				[prop('queries'), prop('mutations')]
+			)
+		)
+		.ap(List.of(schema))
+		.foldMap(concat('\n\n'), '')
+	}
+)

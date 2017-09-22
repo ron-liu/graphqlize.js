@@ -6,8 +6,7 @@ import Sequelize from 'sequelize'
 export type Schema = {
 	types: Array<string>,
 	queries?: Array<string>,
-	mutations?: Array<string>,
-	inputs?: Array<string>
+	mutations?: Array<string>
 }
 
 type Connection = {
@@ -109,7 +108,7 @@ export type Model = {
 	modelKind: 'valueObject' | 'persistence' | 'outSourcing'
 }
 
-type Action = 'create' | 'update' | 'upsert' | 'delete'
+export type Action = 'create' | 'update' | 'upsert' | 'delete'
 
 export type GenModelInputOption = {
 	allowIdNull: boolean,
