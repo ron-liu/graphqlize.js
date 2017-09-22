@@ -97,12 +97,12 @@ const buildValueObjectColumnFilter: Fn1<Field, [string]> = field => []
 const buildRelationColumnFilter: Fn1<Field, [string]> = field => Box(field)
 	.fold(ifElse(
 		prop('isList'),
-		K(['every', 'some', 'none'].map(x => `${field.name}_${x}:${getModelFilterName(field.graphqlType)}`)),
+		K(['some', 'none'].map(x => `${field.name}_${x}:${getModelFilterName(field.graphqlType)}`)),
 		K([
 			`${field.name}:${getModelFilterName(field.graphqlType)}`,
 			`${field.name}Id:ID`
 		])
-	))
+	)) //todo: implements 1-n every query
 
 const genCreateModelInput = genModelInput({allowIdNull: true, allowFieldsOtherThanIdNull: false, action: 'create'})
 const genUpdateModelInput = genModelInput({allowIdNull: false, allowFieldsOtherThanIdNull: true, action: 'update'})
@@ -153,6 +153,7 @@ const genValueObjectModelInputs : Fn1<Model, [string]>
 	.toArray()
 
 const isModelKind: CurriedFn2<string, Model, boolean> = propEq('modelKind')
+
 export const genModelsInputs: Fn1<[Model], [string]>
 = models => Box(models)
 	.map(filter(either(isModelKind(TYPE_KIND.VALUE_OBJECT), isModelKind(TYPE_KIND.PERSISTENCE))))

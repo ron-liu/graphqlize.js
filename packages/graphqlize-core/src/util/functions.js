@@ -1,4 +1,4 @@
-import {curry, prop, pipe, isNil, not, equals} from 'ramda'
+import {curry, prop, pipe, isNil, not, equals, contains} from 'ramda'
 export {
 	not, converge, filter, applySpec, evolve, lensProp, over, toPairs, fromPairs, lensIndex,
 	contains, join, when, prop, equals, find, tap, map, path, range, inc, dec,
@@ -16,3 +16,4 @@ export const isArray = Array.isArray
 export const propFn = curry((name, fn, obj) => fn(prop(name, obj)))
 export const isNotNil = pipe(isNil, not)
 export const notEquals = curry( (a, b) => pipe(equals(a), not)(b) )
+export const notContains = curry( (a, b) => pipe(contains(a), not)(b) )

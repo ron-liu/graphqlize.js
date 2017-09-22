@@ -98,6 +98,31 @@ const generateRelationship = applySpec({
 		})
 	})
 
+const addForeignKey = relationship => {
+	const {
+		from:{multi: fromMulti, as: fromAs, model: fromModelName},
+		to: {to: toMulti, as: toAs, model: toModelName}
+	} = relationship
+	
+	const onFromForeignKey = lensPath(['from', 'foreignKey'])
+	const onToForeignKey = lensPath(['to', 'foreignKey'])
+	
+	// n-n, must be bi-direction
+	if (fromMulti && toMulti) {
+		return Box(relationship)
+			.map(set(onFromForeignKey, `${fromAs}Id`))
+			.fold(set(onToForeignKey, `${toAs}Id`))
+	}
+	
+	const foreignKey = fromMulti
+		? toAs ? `${toAs}Id` :  `id_for_${fromModelName}_${fromAs}` // 1-n
+		: `${fromAs}Id` // // n-1 or 1-1
+	
+	return Box(relationship)
+		.map(set(onFromForeignKey, foreignKey))
+		.fold(set(onToForeignKey, foreignKey))
+}
+
 // Ast -> Validation.Failure | Result.Ok relationships
 export const getRelationshipsFromAst = ast => taskOf(ast) // Ok ast
 	.map(getPersistenceTypes)    // Ok [AstType]
@@ -106,6 +131,7 @@ export const getRelationshipsFromAst = ast => taskOf(ast) // Ok ast
 	.map(groupBy(prop('relationName')))
 	.map(values)
 	.map(map(generateRelationship))
+	.map(map(addForeignKey))
 
 export const getModelRelationships : Fn1<[Relationship], [Relationship]> = (relationships, modelName) => Box(relationships)
 	.map(filter(either(pathEq(['from', 'model'], modelName), pathEq(['to', 'model'], modelName))))

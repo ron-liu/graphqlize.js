@@ -62,12 +62,14 @@ export type Relationship = {
 	from: {
 		multi: boolean,
 		model: string,
-		as: string
+		as: string,
+		foreignKey: string,
 	},
 	to: {
 		multi: boolean,
 		model: string,
-		as?: string
+		as?: string,
+		foreignKey: string,
 	}
 }
 export type Db = typeof Sequelize
@@ -114,3 +116,5 @@ export type GenModelInputOption = {
 	allowFieldsOtherThanIdNull: boolean,
 	action: string
 }
+
+export type WhereAndInclude = {where: mixed, include: [mixed]}

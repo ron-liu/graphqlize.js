@@ -1,7 +1,7 @@
 import {getAst} from '../ast'
 import {getModelRelationships, getRelationshipsFromAst} from '../relationship'
 
-test('n-1 should work', async () => {
+test('1-n should work', async () => {
 	const types = [
 		`type Post {
 		  id: ID
@@ -21,8 +21,8 @@ test('n-1 should work', async () => {
 	
 	expect(relationships).toEqual([
 		{
-			from: {multi: true, model: 'Post', as: "comments"},
-			to: {multi: false, model: 'Comment'},
+			from: {multi: true, model: 'Post', as: "comments", foreignKey: 'id_for_Post_comments'},
+			to: {multi: false, model: 'Comment', foreignKey: 'id_for_Post_comments'},
 		}
 	])
 })
@@ -54,8 +54,8 @@ describe ('n-1 1-n should work', () => {
 	test('n-1 1-n should work', async () => {
 		expect(relationships).toEqual([
 			{
-				from: {multi: true, model: 'Post', as: "comments"},
-				to: {multi: false, model: 'Comment', as: "post"},
+				from: {multi: true, model: 'Post', as: "comments", foreignKey: 'postId'},
+				to: {multi: false, model: 'Comment', as: "post", foreignKey: 'postId'},
 			}
 		])
 	})
@@ -63,16 +63,12 @@ describe ('n-1 1-n should work', () => {
 	test('getModelRelationship should work', () => {
 		expect(getModelRelationships(relationships, 'Comment')).toEqual([
 			{
-				from: {multi: false, model: 'Comment', as: "post"},
-				to: {multi: true, model: 'Post'},
+				from: {multi: false, model: 'Comment', as: "post", foreignKey: 'postId'},
+				to: {multi: true, model: 'Post', foreignKey: 'postId'},
 			}
 		])
 	})
 })
 
-
-
-
 //todo: 1-n 1-1 n-n tests, and other edge cases tests
 //todo: shall support validation
-

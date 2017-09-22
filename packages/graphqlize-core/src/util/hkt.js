@@ -3,7 +3,8 @@ import {
 	rejected as taskRejected,
 	do as taskDo,
 	task,
-	waitAll as taskAll
+	waitAll as taskAll,
+	fromPromised as taskifyPromiseFn
 } from 'folktale/concurrency/task'
 
 export const Box = x =>
@@ -31,4 +32,4 @@ export const promiseToTask = promise => task(
 	({resolve, reject}) => promise.then(resolve).catch(reject)
 )
 
-export {taskOf, taskRejected, taskDo, task, taskAll}
+export {taskOf, taskRejected, taskDo, task, taskAll, taskifyPromiseFn}

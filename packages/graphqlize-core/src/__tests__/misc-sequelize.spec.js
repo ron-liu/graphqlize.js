@@ -1,9 +1,57 @@
 import Sequelize from 'sequelize'
 import {v4} from 'uuid'
 
-const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
+describe.only ("nested n-1 should be queryable for parent", () => {
+	const sequelize = new Sequelize('', '', '', {dialect: 'sqlite',})
+	const PostModel = sequelize.define('Post', {
+		title: Sequelize.STRING,
+		createdBy: Sequelize.STRING
+	})
+	const CommentModel = sequelize.define('Comment', {
+		content: Sequelize.STRING,
+		createdBy: Sequelize.STRING
+	})
+	const LikeModel = sequelize.define('Like', {
+		createdBy: Sequelize.STRING
+	})
+	LikeModel.belongsTo(CommentModel, {as: 'comment', foreignKey: 'commentId'})
+	CommentModel.belongsTo(PostModel, {as: 'post', foreignKey: 'postId'})
+	
+	beforeEach(async (done) => {
+		await sequelize.sync({force: true})
+		done()
+	})
+	
+	test('should OK', async () => {
+		await LikeModel.create(
+			{
+				createdBy: 'ron',
+				comment:{
+					content: 'good', createdBy: 'john',
+					post: {title: 'hi', createdBy: 'mike'}
+				}
+				
+			},
+			{
+				include: [
+					{model: CommentModel, as: 'comment', include: [{model: PostModel, as: 'post'}]}
+				]
+			}
+		)
+		await LikeModel.findAll({
+			where: {
+				'$comment.post.title$': 'hi'
+			},
+			include: [
+				{model: CommentModel, as: 'comment', include: [{model: PostModel, as: 'post', include: []}]}
+			]
+		})
+		
+	})
+})
 
-describe ("n-1 1-n should be queryable", () => {
+describe ("n-1 with 1-n should be queryable for parent", () => {
+	const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
 	const PostModel = sequelize.define('Post', {
 		title: Sequelize.STRING,
 		createdBy: Sequelize.STRING
@@ -43,7 +91,35 @@ describe ("n-1 1-n should be queryable", () => {
 		)
 		expect(result).toHaveLength(2)
 	})
+})
 
+describe('only 1-n should be queryable', () => {
+	const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
+	const PostModel = sequelize.define('Post', {
+		title: Sequelize.STRING,
+		createdBy: Sequelize.STRING
+	})
+	const CommentModel = sequelize.define('Comment', {
+		content: Sequelize.STRING,
+		createdBy: Sequelize.STRING
+	})
+	PostModel.hasMany(CommentModel, {as: 'comments', foreignKey: 'id_for_Post_comments'})
+	
+	beforeEach(async(done) => {
+		await sequelize.sync({force: true})
+		done()
+	})
+	
+	test('from n side should be queryable', async () => {
+		const post = await PostModel.create(
+			{title: 'hi', createdBy: 'ron', comments: [{content: 'good', createdBy: 'john'}]},
+			{include: [{model: CommentModel, as: 'comments'}]}
+		)
+		
+		const comments = await CommentModel.findAll({where: {id_for_Post_comments: post.id}})
+		expect(comments).toHaveLength(1)
+	})
+	
 	test('trying to use generate query statement', async () => {
 		const Model = require('sequelize/lib/model')
 		let options = {
@@ -67,14 +143,14 @@ describe ("n-1 1-n should be queryable", () => {
 		)
 		
 		let options = {
-			attributes: ['postId'],
+			attributes: ['id_for_Post_comments'],
 			where: {
 				createdBy: 'ron'
 			}
 		};
 		const subSql = sequelize.dialect.QueryGenerator
-		.selectQuery(CommentModel.tableName, options, CommentModel)
-		.slice(0,-1)
+			.selectQuery(CommentModel.tableName, options, CommentModel)
+			.slice(0,-1)
 		
 		const posts = (await PostModel.findAll({
 			where: {
@@ -85,9 +161,11 @@ describe ("n-1 1-n should be queryable", () => {
 		expect(posts).toHaveLength(1)
 		expect(posts[0].get().title).toEqual('oh')
 	})
+	
 })
 
 describe ('1-1 should', () => {
+	const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
 	const AccountModel = sequelize.define('Account', {
 		password: Sequelize.STRING
 	})
@@ -143,6 +221,7 @@ describe ('1-1 should', () => {
 })
 
 describe('n-n', async () => {
+	const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
 	const UserModel = sequelize.define('user', { name: Sequelize.STRING })
 	const TeamModel = sequelize.define('team', { logo: Sequelize.STRING})
 	
@@ -194,6 +273,7 @@ describe('n-n', async () => {
 })
 
 describe ('1-n only',  () => {
+	const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
 	const StudentModel = sequelize.define('student', {name: Sequelize.STRING})
 	const ClassModel = sequelize.define('class', {logo: Sequelize.STRING})
 	
@@ -207,6 +287,7 @@ describe ('1-n only',  () => {
 })
 
 describe('upsert', () => {
+	const sequelize = new Sequelize('', '', '', { dialect: 'sqlite',})
 	const StudentModel = sequelize.define('student', {
 		name: Sequelize.STRING,
 		id: {

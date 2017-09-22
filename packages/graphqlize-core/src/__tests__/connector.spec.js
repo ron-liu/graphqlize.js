@@ -40,7 +40,7 @@ describe('connector service', () => {
 		await Post.create({title: '#1'})
 		const post = await Post.findOne()
 		
-		expect(post.get()).toEqual(expect.objectContaining({title: '#1'}))
+		expect(post).toEqual(expect.objectContaining({title: '#1'}))
 	})
 })
 
@@ -72,6 +72,6 @@ describe('connector service with middlewares', () => {
 		await Post.create({title: '#1'})
 		const post = await Post.findOne()
 
-		expect(post.get()).toEqual(expect.objectContaining({title: '#1', comment: 'auto added'}))
+		expect(post).toEqual(expect.objectContaining({title: '#1', comment: 'auto added'}))
 	})
 })
