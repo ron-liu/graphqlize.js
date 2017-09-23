@@ -21,8 +21,8 @@ test('1-n should work', async () => {
 	
 	expect(relationships).toEqual([
 		{
-			from: {multi: true, model: 'Post', as: "comments", foreignKey: 'id_for_Post_comments'},
-			to: {multi: false, model: 'Comment', foreignKey: 'id_for_Post_comments'},
+			from: {multi: false, model: 'Post', as: "comments", foreignKey: 'id_for_Post_comments'},
+			to: {multi: true, model: 'Comment', foreignKey: 'id_for_Post_comments'},
 		}
 	])
 })
@@ -54,8 +54,8 @@ describe ('n-1 1-n should work', () => {
 	test('n-1 1-n should work', async () => {
 		expect(relationships).toEqual([
 			{
-				from: {multi: true, model: 'Post', as: "comments", foreignKey: 'postId'},
-				to: {multi: false, model: 'Comment', as: "post", foreignKey: 'postId'},
+				from: {multi: false, model: 'Post', as: "comments", foreignKey: 'postId'},
+				to: {multi: true, model: 'Comment', as: "post", foreignKey: 'postId'},
 			}
 		])
 	})
@@ -63,8 +63,8 @@ describe ('n-1 1-n should work', () => {
 	test('getModelRelationship should work', () => {
 		expect(getModelRelationships(relationships, 'Comment')).toEqual([
 			{
-				from: {multi: false, model: 'Comment', as: "post", foreignKey: 'postId'},
-				to: {multi: true, model: 'Post', foreignKey: 'postId'},
+				from: {multi: true, model: 'Comment', as: "post", foreignKey: 'postId'},
+				to: {multi: false, model: 'Post', foreignKey: 'postId'},
 			}
 		])
 	})

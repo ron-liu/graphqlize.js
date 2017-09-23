@@ -81,7 +81,7 @@ const defineSequelizeRelations = (db, relationships) => taskTry(
 				}
 				
 				// n-1 or 1-1
-				if (!toMulti) {
+				if (!fromMulti) {
 					FromModel.belongsTo(ToModel, {as: fromAs, foreignKey: fromForeignKey})
 					toAs && ToModel[fromMulti ? 'hasMany' : 'hasOne'](FromModel, {as: toAs})
 					return

@@ -79,16 +79,16 @@ const extractTypesFields = astTypes => taskTry(
 
 const generateRelationship = applySpec({
 		from: applySpec({
-			multi: pipe(head, prop('isList')),
-			model: pipe(head, prop('objectName')),
-			as: pipe(head, prop('name'))
-		}),
-		to: applySpec({
 			multi: ifElse(
 				pipe(length, equals(1)),
 				K(false),
 				pipe(last, prop('isList'))
 			),
+			model: pipe(head, prop('objectName')),
+			as: pipe(head, prop('name'))
+		}),
+		to: applySpec({
+			multi: pipe(head, prop('isList')),
 			model: pipe(head, prop('type')),
 			as: ifElse(
 				pipe(length, equals(1)),
@@ -114,7 +114,7 @@ const addForeignKey = relationship => {
 			.fold(set(onToForeignKey, `${toAs}Id`))
 	}
 	
-	const foreignKey = fromMulti
+	const foreignKey = !fromMulti
 		? toAs ? `${toAs}Id` :  `id_for_${fromModelName}_${fromAs}` // 1-n
 		: `${fromAs}Id` // // n-1 or 1-1
 	
