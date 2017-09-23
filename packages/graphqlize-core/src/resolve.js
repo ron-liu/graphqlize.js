@@ -2,10 +2,10 @@ import {getModelConnectorName} from './connector'
 import {
 	promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
 	__, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
-	curry, toPairs, taskifyPromiseFn
+	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat
 } from "./util"
 import {queryOperators} from "./schema"
-import {applySpec, converge, fromPairs, isEmpty, pair, propEq} from "ramda";
+import {applySpec, converge, fromPairs, isEmpty, pair, propEq, tap} from "ramda";
 import {FIELD_KIND} from "./constants";
 import {getModelRelationships} from "./relationship";
 import {List} from 'immutable-ext'
@@ -22,11 +22,11 @@ export const findAll = ({models, model, relationships}) => async (
 		getDb,
 		getService
 	},
-	args
+	args = {}
 ) => {
 	const modelConnector = await getModelConnector()
 	const db = getDb()
-	const {filter, orderBy, after, skip, take} = args
+	const {filter, orderBy = [], after, skip, take} = args
 	
 	// args -> Task Where
 	// [{column: 'name', direction: 'ASC'}, {column: 'age', direction: 'DESC'}]
@@ -39,7 +39,7 @@ export const findAll = ({models, model, relationships}) => async (
 	// ]
 	// }
 	const getCursorWhere = after => taskDo(function *() {
-		if (!after) return taskOf()
+		if (!after) return taskOf({})
 		const currentOne = yield modelConnector.findOneT({where: {id: after}})
 			.chain(rejectIfNil(`In findAll, the argument 'after' points to invalid ID(${after})`))
 		
@@ -158,20 +158,20 @@ export const findAll = ({models, model, relationships}) => async (
 	}
 	
 	// (Models, Model) -> filter -> sequelize's where
-	function getWhereAndInclude (theModel, filter) {
+	function getWhereAndInclude (theModel, filter={}) {
 		return taskOf(filter)
-			.map(toPairs)
-			.map(map(applySpec({fieldOperator: path([0]), value: path([1])})))
-			.chain(x => List(x)
-				.traverse(taskOf, getOperatorWhereAndInclude(theModel))
-			)
-			.map(reduce(mergeWheresAndConcatIncludes, {}))
+		.map(toPairs)
+		.map(map(applySpec({fieldOperator: path([0]), value: path([1])})))
+		.chain(x => List(x)
+			.traverse(taskOf, getOperatorWhereAndInclude(theModel))
+		)
+		.map(reduce(mergeWheresAndConcatIncludes, {where: {}, include: []}))
 	}
 	
 	return taskDo(function * () {
 		const cursorWhere = yield getCursorWhere(after)
 		const {where, include} = yield getWhereAndInclude(model, filter)
-		
+		console.log(filter, where, include, skip, take, orderBy, 232)
 		return modelConnector.findAllT({
 			where: {...cursorWhere, ...where},
 			include,

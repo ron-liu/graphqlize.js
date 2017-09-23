@@ -25,9 +25,9 @@ const graphqlize : Graphqlize = async (option = {}) => {
 		])
 		
 		yield taskAll([
-			defineSequelize({db, relationships, models}),
+			defineSequelize({db, relationships, models, option}),
 			buildAndAddGetModelConnectorsServices({option: validatedOption, db, models}),
-			addBuiltInModelServices(validatedOption, models)
+			addBuiltInModelServices({option: validatedOption, models, relationships})
 		])
 		
 		return taskOf()

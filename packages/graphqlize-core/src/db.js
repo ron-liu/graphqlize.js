@@ -95,5 +95,6 @@ const defineSequelizeRelations = (db, relationships) => taskTry(
 	}
 )
 
-export const defineSequelize = ({db, relationships, models}) => defineSequelizeModels(db, models)
+export const defineSequelize = ({option, db, relationships, models}) => defineSequelizeModels(db, models)
 	.chain(() => defineSequelizeRelations(db, relationships))
+	.chain(()=>sync(option, db))

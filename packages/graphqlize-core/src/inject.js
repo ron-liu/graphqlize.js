@@ -34,11 +34,11 @@ const allActions = [
 ]
 
 // GraphqlizeOption -> [Model] -> Task void
-export const addBuiltInModelServices = (option, models) => taskTry(
+export const addBuiltInModelServices = ({option, models, relationships}) => taskTry(
 	() => List.of(action => model => Box(model)
 		.fold(applySpec({
 			name: action.name,
-			func: K(action.func),
+			func: () => action.func({relationships, models, model}),
 			option: applySpec({
 				graphql: action.toExposeOption,
 				injects: model => List(action.injects)
@@ -49,6 +49,5 @@ export const addBuiltInModelServices = (option, models) => taskTry(
 	)
 	.ap(List(allActions))
 	.ap(List(models))
-	.map(tap(console.log))
 	.map(option.core.buildAndAddService)
 )
