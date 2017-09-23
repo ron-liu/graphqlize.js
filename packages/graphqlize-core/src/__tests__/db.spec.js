@@ -1,5 +1,5 @@
 import {getModelsFromTypes, createSequelize} from './shared'
-import {defineSequelizeModels, sync} from '../db'
+import {defineSequelize, sync} from '../db'
 import {promiseToTask} from "../util/hkt";
 
 test('isUnique should work', async () => {
@@ -12,7 +12,7 @@ test('isUnique should work', async () => {
 	const models = await getModelsFromTypes(types)
 	const sequelize = createSequelize()
 	
-	await defineSequelizeModels(sequelize, models)
+	await defineSequelize({db: sequelize, models, relationships: []})
 		.chain(() => sync({connection: {option: {sync: {force: true}}}}, sequelize))
 		.run()
 		.promise()

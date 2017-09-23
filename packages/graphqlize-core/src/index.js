@@ -3,13 +3,14 @@ import {taskDo, taskAll, taskOf, taskRejected} from './util'
 import {getOption} from './option'
 import {getAst} from './ast'
 import {getRelationshipsFromAst} from './relationship'
-import {defineSequelizeModels, defineSequelizeRelations, initSequelize, registerGetDbService, sync} from './db'
+import {defineSequelize, initSequelize, registerGetDbService, sync} from './db'
 import {getModels} from './model'
 import {buildAndAddGetModelConnectorsServices} from './connector'
 import {printJson} from "./util/misc";
+import {addBuiltInModelServices} from "./inject";
 
 const graphqlize : Graphqlize = async (option = {}) => {
-	const app = taskDo(function *() {
+	return taskDo(function *() {
 		const validatedOption = yield getOption(option)
 		
 		const [db, ast] = yield taskAll([
@@ -17,17 +18,20 @@ const graphqlize : Graphqlize = async (option = {}) => {
 			getAst(validatedOption)
 		])
 		
-		yield registerGetDbService(validatedOption, db)
-		const relationships = yield getRelationshipsFromAst(ast)
-		const models = yield getModels(ast, validatedOption)
-		yield defineSequelizeModels(db, models)
-		yield defineSequelizeRelations(db, relationships)
-		yield buildAndAddGetModelConnectorsServices({option: validatedOption, db, models})
+		const [, relationships, models] = yield taskAll([
+			registerGetDbService(validatedOption, db),
+			getRelationshipsFromAst(ast),
+			getModels(ast, validatedOption)
+		])
+		
+		yield taskAll([
+			defineSequelize({db, relationships, models}),
+			buildAndAddGetModelConnectorsServices({option: validatedOption, db, models}),
+			addBuiltInModelServices(validatedOption, models)
+		])
 		
 		return taskOf()
 	})
-	
-	return await app
 	.orElse(x=>{
 		console.log('error caught:', x)
 		return taskRejected(x)

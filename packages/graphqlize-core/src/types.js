@@ -117,3 +117,13 @@ export type GenModelInputOption = {
 }
 
 export type WhereAndInclude = {where: mixed, include: [mixed]}
+
+export type ExposeToGraphqlOption = { // customised query or mutation
+	kind: 'query' | 'mutation',
+	input?: {[id: string]: string | [string]},
+	payload: {[id: string]: string | [string]}
+} | { // built-in model CRUD
+	kind: 'query' | 'mutation',
+	args?: {[id: string]: string},
+	returns: string | [string]
+}

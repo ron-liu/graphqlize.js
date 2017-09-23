@@ -1,7 +1,7 @@
 import Sequelize from 'sequelize'
 import {v4} from 'uuid'
 
-describe.only ("nested n-1 should be queryable for parent", () => {
+describe ("nested n-1 should be queryable for parent", () => {
 	const sequelize = new Sequelize('', '', '', {dialect: 'sqlite',})
 	const PostModel = sequelize.define('Post', {
 		title: Sequelize.STRING,

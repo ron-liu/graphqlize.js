@@ -50,7 +50,7 @@ const getSequelizeModelDefinitions = pipe(
 	fromPairs
 )
 
-export const defineSequelizeModels = (db, models) => taskTry(
+const defineSequelizeModels = (db, models) => taskTry(
 	() => {
 		models.forEach(
 			converge((modelName, definitions) => db.define(modelName, definitions),
@@ -63,7 +63,7 @@ export const defineSequelizeModels = (db, models) => taskTry(
 	}
 )
 
-export const defineSequelizeRelations = (db, relationships) => taskTry(
+const defineSequelizeRelations = (db, relationships) => taskTry(
 	() => {
 		relationships.forEach(
 			({
@@ -94,3 +94,6 @@ export const defineSequelizeRelations = (db, relationships) => taskTry(
 		)
 	}
 )
+
+export const defineSequelize = ({db, relationships, models}) => defineSequelizeModels(db, models)
+	.chain(() => defineSequelizeRelations(db, relationships))

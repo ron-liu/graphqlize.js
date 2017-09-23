@@ -16,7 +16,7 @@ const rejectIfNil = errorMessage => ifElse(
 	taskOf
 )
 
-const findAll = ({models, model, relationships}) => async (
+export const findAll = ({models, model, relationships}) => async (
 	{
 		[getModelConnectorName(model)]: getModelConnector,
 		getDb,
