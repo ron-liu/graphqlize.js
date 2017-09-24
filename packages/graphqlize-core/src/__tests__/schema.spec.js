@@ -1,8 +1,7 @@
 import {getModels} from '../model'
 import {getAst} from '../ast'
 import {genModelsInputs, schemaToString} from '../schema'
-import {taskOf, tap} from '../util'
-import {List} from 'immutable-ext'
+import {List, taskOf, tap} from '../util'
 
 describe ('types to inputs', () => {
 	const types = [

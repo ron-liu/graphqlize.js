@@ -3,9 +3,8 @@ import Result from 'folktale/result'
 import type {GraphqlizeOption} from './types'
 import {
 	path, I, ifElse, then, concat, compose, tap, K, validationToTask, evolve, when, isNil, Box, propSatisfies,
-	set, lensProp, pipe
+	set, lensProp, pipe, List
 } from "./util";
-import {List} from 'immutable-ext'
 import {mergeSystemSchema} from './schema'
 import {mergeOptionWithBuiltInScalars} from './builtin-scalars'
 

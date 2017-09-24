@@ -1,14 +1,14 @@
 import type {CurriedFn2, Fn1} from './basic-types'
 import {plural} from 'pluralize'
-import {prop, capitalize, surround, deCapitalize, K, applySpec, pipe, __, Box, taskTry, concat} from "./util";
+import {List, prop, capitalize, surround, deCapitalize, K, applySpec, pipe, __, Box, taskTry, concat} from "./util";
 import type {ExposeToGraphqlOption, Model} from './types'
-import {findAll} from './resolve'
+import {findAll, create, getCreateModelName, getFindAllModelName} from './resolve'
 import {getModelConnectorName} from './connector'
-import {List} from 'immutable-ext'
-import {tap} from "ramda";
+import {converge, fromPairs, pair, tap} from "ramda";
+import {I} from "./util/functions";
 
 const modelToFindAllExposeOption : Fn1<Model, ExposeToGraphqlOption>
-	= pipe(
+= pipe(
 	prop('name'),
 	applySpec({
 		name: pipe(capitalize, concat('all'), plural),
@@ -24,12 +24,30 @@ const modelToFindAllExposeOption : Fn1<Model, ExposeToGraphqlOption>
 	})
 )
 
+type CUU = 'create' | 'update' | 'upsert'
+const modelToCUUExposeOption : CurriedFn2<CUU, Model, ExposeToGraphqlOption>
+= getName => model => Box(model)
+.map(prop('name'))
+.fold(applySpec({
+	kind: K('mutation'),
+	args: applySpec({
+		input: pipe(getName, concat(__, 'Input'))
+	}),
+	returns: I
+}))
+
 const allActions = [
 	{
-		name: pipe(prop('name'), capitalize, concat('findAll')),
-		injects: [ K('getDb'), getModelConnectorName, K('getService') ],
+		name: getFindAllModelName,
+		injects: [ K('$getDb'), getModelConnectorName, K('getService') ],
 		toExposeOption: modelToFindAllExposeOption,
 		func: findAll,
+	},
+	{
+		name: getCreateModelName,
+		injects: [ K('$getDb'), getModelConnectorName, K('getService') ],
+		toExposeOption: modelToCUUExposeOption(getCreateModelName),
+		func: create,
 	}
 ]
 
@@ -37,7 +55,7 @@ const allActions = [
 export const addBuiltInModelServices = ({option, models, relationships}) => taskTry(
 	() => List.of(action => model => Box(model)
 		.fold(applySpec({
-			name: action.name,
+			name: pipe(prop('name'), action.name),
 			func: () => action.func({relationships, models, model}),
 			option: applySpec({
 				graphql: action.toExposeOption,

@@ -2,13 +2,15 @@ import {getModelConnectorName} from './connector'
 import {
 	promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
 	__, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
-	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat
+	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter,
+	List
 } from "./util"
 import {queryOperators} from "./schema"
-import {applySpec, converge, fromPairs, isEmpty, pair, propEq, tap} from "ramda";
+import {applySpec, converge, fromPairs, isEmpty, pair, pathEq, propEq, tap} from "ramda";
 import {FIELD_KIND} from "./constants";
 import {getModelRelationships} from "./relationship";
-import {List} from 'immutable-ext'
+import {capitalize} from "./util/misc";
+import type {Fn1} from 'basic-types'
 
 const rejectIfNil = errorMessage => ifElse(
 	isNil,
@@ -16,16 +18,17 @@ const rejectIfNil = errorMessage => ifElse(
 	taskOf
 )
 
+export const getFindAllModelName : Fn1<string, string> = pipe(capitalize, concat('findAll'))
 export const findAll = ({models, model, relationships}) => async (
 	{
 		[getModelConnectorName(model)]: getModelConnector,
-		getDb,
+		$getDb,
 		getService
 	},
 	args = {}
 ) => {
 	const modelConnector = await getModelConnector()
-	const db = getDb()
+	const db = $getDb()
 	const {filter, orderBy = [], after, skip, take} = args
 	
 	// args -> Task Where
@@ -171,7 +174,6 @@ export const findAll = ({models, model, relationships}) => async (
 	return taskDo(function * () {
 		const cursorWhere = yield getCursorWhere(after)
 		const {where, include} = yield getWhereAndInclude(model, filter)
-		console.log(filter, where, include, skip, take, orderBy, 232)
 		return modelConnector.findAllT({
 			where: {...cursorWhere, ...where},
 			include,
@@ -184,3 +186,83 @@ export const findAll = ({models, model, relationships}) => async (
 		})
 	}).run().promise()
 }
+
+export const getCreateModelName : Fn1<string, string> = pipe(capitalize, concat('create'))
+export const create =  ({models, model, relationships}) => async (
+	{
+		[getModelConnectorName(model)]: getModelConnector,
+		$getDb,
+		getService
+	},
+	args = {}
+) => {
+	const input = args.input
+	const modelRelationships = getModelRelationships(relationships, model.name)
+	const modelConnector = await getModelConnector()
+	const db = $getDb()
+	
+	const createSubModelT = (modelName, fields) => {
+		const service = getService({name: getCreateModelName(modelName)})
+		return promiseToTask(service({input: fields}))
+	}
+	
+	const updateSubModelT = (modelName, fields, where) => {
+		const connector = getService({name: getModelConnectorName(modelName)})
+		return connector.updateT(fields, {where})
+	}
+	
+	// n-1, create all n-1 relationship models and merge fk ids back to input
+	// Task {[fkId]: ID}
+	const createNTo1s = taskOf(modelRelationships)
+	.map(filter(path(['from', 'multi'])))
+	.map(filter(pipe(path(['from', 'as']), prop(__, input))))
+	.chain(rs => List(rs)
+		.traverse(taskOf, ({from, to}) => createSubModelT(to.model, prop(from.as, input))
+			.map(x=>({[from.foreignKey]: x.id}))
+		)
+	)
+	.map(reduce(merge, {}))
+	
+	// itself
+	// fields -> Task Model
+	const createModel = fields => taskOf(fields)
+	.chain(pipe(
+		modelConnector.create,
+		promiseToTask
+	))
+	
+	// 1-n
+	// id -> Task void
+	const create1ToNs = id => taskOf(modelRelationships)
+	.map(filter(pathEq(['from', 'multi'], false)))
+	.map(filter(pipe(path(['from', 'as']), prop(__, input))))
+	.chain(relationships => List(relationships)
+		.traverse(taskOf, ({from, to}) => List(prop(from.as, input))
+			.traverse(taskOf, fields => createSubModelT(to.model, fields))
+		)
+	)
+	
+	// ids
+	// id -> Task void
+	const create1ToNIds = id => taskOf(modelRelationships)
+	.map(filter(pathEq(['from', 'multi'], false)))
+	.map(filter(pipe(path(['from', 'as']), concat(__, 'Ids'), prop(__, input))))
+	.chain(relationships => List(relationships)
+		.traverse(taskOf, ({from, to}) => updateSubModelT(
+			to.model,
+			{[to.foreignKey]: id},
+			{id: {$in: prop(`${from.as}Ids`, input)}}
+			)
+		)
+	)
+	
+	return taskDo(function * () {
+		const ids = yield createNTo1s
+		const ret = yield createModel({...input, ...ids})
+		yield List.of(create1ToNIds, create1ToNs)
+			.traverse(taskOf, f => f(ret.id))
+		return taskOf(ret)
+	}).run().promise()
+}
+
+export const getUpdateModelName : Fn1<string, string> = pipe(capitalize, concat('update'))

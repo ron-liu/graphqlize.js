@@ -1,9 +1,8 @@
 import {
 	Box, prop, capitalize, concat, taskTry, taskOf, pick, __, I, values, mapObjIndexed, over, lensPath,
-	toPairs, map, taskifyPromiseFn, fromPairs
+	toPairs, map, taskifyPromiseFn, fromPairs, List
 } from './util'
 import SequelizeModel from 'sequelize/lib/model'
-import {List} from 'immutable-ext'
 import {omit} from "ramda";
 
 export const getModelConnectorName = model => Box(model)
