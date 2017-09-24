@@ -18,11 +18,11 @@ const buildAndAddGetModelConnectorService = ({option, db, model}) => taskTry(
 	.fold(core => core.buildAndAddService({
 		name: getModelConnectorName(model),
 		option: {
-			injects: [...option.connectorMiddlewares, 'getDb']
+			injects: [...option.connectorMiddlewares, '$getDb']
 		},
 		
-		func: async ({getDb, ...middlewares}, _) => {
-			const db = getDb()
+		func: async ({$getDb, ...middlewares}, _) => {
+			const db = $getDb()
 			let connector = Box(db.model(model.name))
 			.fold(model => ({
 				findAll: options => model.findAll({...options}).then(map(x=>x.get())),

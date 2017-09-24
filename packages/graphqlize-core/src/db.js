@@ -19,7 +19,7 @@ export const registerGetDbService = (option, db) => taskTry(
 	() => Box(option)
 		.map(prop('core'))
 		.fold(core => core.buildAndAddService({
-			name: 'getDb',
+			name: '$getDb',
 			func: ({}, _) => db
 		}))
 )

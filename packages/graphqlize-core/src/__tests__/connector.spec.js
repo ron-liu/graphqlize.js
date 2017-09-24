@@ -12,7 +12,7 @@ const PostModel = sequelize.define('Post', {
 const createNewCore = () => {
 	const core = createCore()
 	core.buildAndAddService({
-		name: 'getDb',
+		name: '$getDb',
 		func: ({}, _) => sequelize
 	})
 	
