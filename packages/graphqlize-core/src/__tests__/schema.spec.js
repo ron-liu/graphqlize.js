@@ -1,7 +1,7 @@
 import {getModels} from '../model'
 import {getAst} from '../ast'
 import {genModelsInputs, schemaToString} from '../schema'
-import {List, taskOf, tap} from '../util'
+import {List, taskOf, tap, map} from '../util'
 
 describe ('types to inputs', () => {
 	const types = [
@@ -29,14 +29,15 @@ describe ('types to inputs', () => {
 	
 	test('inputs should ok', async () => {
 		await List(types)
-			.map(types => ({schema: {types}, customScalar: []}))
-			.traverse(taskOf, option => getAst(option)
-				.chain(x=>getModels(x, option))
-				.map(genModelsInputs)
-				.map(tap(console.log))
-				.map(inputs => expect(inputs).toMatchSnapshot())
-			).run().promise()
-		
+		.map(types => ({schema: {types}, customScalar: []}))
+		.traverse(taskOf, option => getAst(option)
+			.chain(x=>getModels(x, option))
+			.map(genModelsInputs)
+		)
+		.map(x=>x.toArray())
+		.map(map(tap(console.log)))
+		.map(inputs => expect(inputs).toMatchSnapshot())
+		.run().promise()
 	})
 })
 
@@ -83,10 +84,11 @@ describe('schema to string', () => {
 	]
 	test('should ok', async () => {
 		await List(schemas)
-			.traverse(taskOf,  schema => schemaToString(schema)
-				.map(tap(console.log))
-				.map(s => expect(s).toMatchSnapshot())
-			).run().promise()
+		.traverse(taskOf,  schema => schemaToString(schema))
+		.map(x => x.toArray())
+		.map(map(tap(console.log)))
+		.map(s => expect(s).toMatchSnapshot())
+		.run().promise()
 		
 	})
 })
