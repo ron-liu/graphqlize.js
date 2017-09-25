@@ -95,7 +95,7 @@ test('attempt#5 use do co', async () => {
 	console.log(result)
 })
 
-test('exception', async() => {
+test.skip('exception', async() => {
 	await task(({resolve, reject}) => setTimeout( ()=>resolve(1) , 10))
 	.map(x=>{throw 'err'})
 	.chain(x=> {
@@ -106,7 +106,7 @@ test('exception', async() => {
 	.promise()
 })
 
-it('exception promise', (done) => {
+it.skip('exception promise', (done) => {
 	// try {
 	// 	await new Promise((res, rej) => setTimeout(()=>{
 	// 		rej('dfafd')

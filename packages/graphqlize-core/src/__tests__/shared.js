@@ -5,6 +5,9 @@ import {promiseToTask, taskDo, taskifyPromiseFn, taskOf, Map, List} from "../uti
 import {last, range, tap, length} from "ramda";
 import {taskTry} from "../util/hkt";
 import {K} from "../util/functions";
+import {createCore} from "injectable-core";
+import {graphqlizeT} from "../index";
+import initData from '../init-data'
 
 
 export const createSequelize = () => new Sequelize('', '', '', { dialect: 'sqlite',})
@@ -15,15 +18,29 @@ export const getModelsFromTypes = types => taskOf(types)
 	.run()
 	.promise()
 
-export const runTestCases = (core, cases) =>  taskDo(function *() {
-	const initData = taskifyPromiseFn(core.getService('initData'))
+export const createGraphqlizeOption = (core, types) => ({
+	schema: { types},
+	connection: {
+		option: {
+			dialect: 'sqlite',
+			sync: {force: true}
+		}
+	},
+	core
+})
+
+export const runTestCases = ({types, cases}) =>  taskDo(function *() {
+	const core = createCore()
+	core.addService('initData', initData)
+	const option = createGraphqlizeOption(core, types)
+	yield graphqlizeT(option)
 	const runServiceT = ([serviceName, args]) => promiseToTask(core.getService(serviceName)(args))
 	const assertT = rules => result => Map(rules)
 	.traverse(taskOf, (v, k) => taskTry(() => expect(result)[k](v)))
 	
 	return List(cases)
 	.traverse(taskOf, ({arrange, act, assert}) => {
-			return initData(arrange)
+			return taskifyPromiseFn(core.getService('initData'))(arrange)
 			.chain(() => {
 				return List(range(0, length(act)))
 				.traverse(taskOf, i => {
@@ -38,14 +55,3 @@ export const runTestCases = (core, cases) =>  taskDo(function *() {
 		}
 	)
 }).run().promise()
-
-export const createGraphqlizeOption = (core, types) => ({
-	schema: { types},
-	connection: {
-		option: {
-			dialect: 'sqlite',
-			sync: {force: true}
-		}
-	},
-	core
-})

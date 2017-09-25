@@ -9,8 +9,7 @@ import {buildAndAddGetModelConnectorsServices} from './connector'
 import {printJson} from "./util/misc";
 import {addBuiltInModelServices} from "./inject";
 
-const graphqlize : Graphqlize = async (option = {}) => {
-	return taskDo(function *() {
+export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
 		const validatedOption = yield getOption(option)
 		
 		const [db, ast] = yield taskAll([
@@ -37,8 +36,7 @@ const graphqlize : Graphqlize = async (option = {}) => {
 		console.log('error caught:', x)
 		return taskRejected(x)
 	})
-	.run()
-	.promise()
-}
+
+const graphqlize = option => graphqlizeT(option).run().promise()
 
 export default graphqlize
