@@ -3,7 +3,7 @@ import {
 	promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
 	__, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
 	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter,
-	List
+	List, merge
 } from "./util"
 import {queryOperators} from "./schema"
 import {applySpec, converge, fromPairs, isEmpty, pair, pathEq, propEq, tap} from "ramda";

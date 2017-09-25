@@ -1,40 +1,47 @@
 import graphqlize from '..'
 import {createCore} from 'injectable-core'
+import initData from '../init-data'
+import {createGraphqlizeOption, runTestCases} from './shared'
 
 describe('simple find all', () => {
 	const core = createCore()
+	core.addService('initData', initData)
 	
-	const option = {
-		schema: {
-			types: [
-				`
+	const types = [`
 				type Post {
 					content: String,
 					likes: Int
 				}
 				`]
-		},
-		connection: {
-			option: {
-				dialect: 'sqlite',
-				sync: {force: true}
-			}
-		},
-		core
-	}
 	
-	beforeAll(async (done) => {
+	const option = createGraphqlizeOption(core, types)
+	
+	const testCases = [
+		{
+			arrange: {
+				Post: [
+					{content: 'hi', likes: 2},
+					{content: 'hello', likes: 3},
+				]
+			},
+			act: [
+				[
+					['findAllPost', { filter: {content: 'hi'} } ]
+				],
+			],
+			assert: [
+				{ toHaveLength: 1 }
+			]
+			
+		}
+	]
+	
+	beforeAll(async done => {
 		await graphqlize(option)
 		done()
 	})
 	
-	test('work for scalar query condition', async() => {
-		const findAllPost = core.getService('findAllPost')
-		await findAllPost({filter: {content: '1'}})
+	test('should work', async () => {
+		await runTestCases(core, testCases)
 	})
-	test('work for no condition', async() => {
-		const findAllPost = core.getService('findAllPost')
-		await findAllPost()
-	})
-	
 })

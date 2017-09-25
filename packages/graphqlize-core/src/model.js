@@ -170,3 +170,12 @@ export const getModels = (ast, option) => taskTry(() => {
 		})))
 		.fold(I)
 })
+
+export const registerGetModelInfoService = ({option, relationships, models}) => taskTry(
+	() => Box(option)
+	.map(prop('core'))
+	.fold(core => core.buildAndAddService({
+		name: '$getAllModelsInfo',
+		func: ({}, _) => ({relationships, models})
+	}))
+)

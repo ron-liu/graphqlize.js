@@ -2,8 +2,9 @@ import type {GraphqlizeOption, Schema, Model, Field, GenModelInputOption, Action
 import type {Fn1, Fn2, Fn3, CurriedFn2} from 'basic-types'
 import {
 	flatten, mergeWith, over, concat, lensProp, Box, prop, map, when, K, pipe, __, either, capitalize, join, tap,
-	propEq, ifElse, filter, contains, propSatisfies, I, values, List
+	propEq, ifElse, filter, contains, propSatisfies, I, values,List
 } from "./util"
+// import {List} from 'immutable-ext'
 import {FIELD_KIND, TYPE_KIND} from './constants'
 import {applySpec, converge, isNil, mapObjIndexed} from "ramda";
 import {joinGraphqlItems} from "./util/misc";

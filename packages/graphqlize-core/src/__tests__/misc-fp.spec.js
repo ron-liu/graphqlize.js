@@ -1,5 +1,7 @@
 import {task, of} from 'folktale/concurrency/task'
 import {converge} from 'ramda'
+import {taskDo, taskOf, List} from "../util";
+import {taskRejected} from "../util/hkt";
 
 const getDbConnection = () =>
 	task(({resolve}) => resolve({id: `connection${Math.floor(Math.random()* 100)}`})
@@ -78,7 +80,7 @@ test('attempt#4 put all outputs into a state which will pass through',  async ()
 	console.log(result) //     token-connection75-account-connection75
 })
 
-test.only('attempt#5 use do co', async () => {
+test('attempt#5 use do co', async () => {
 	const mdo = require('fantasy-do') //todo: replace with task do
 	
 	const app = mdo(function * () {
@@ -91,4 +93,40 @@ test.only('attempt#5 use do co', async () => {
 	const result = await app.run().promise()
 
 	console.log(result)
+})
+
+test('exception', async() => {
+	await task(({resolve, reject}) => setTimeout( ()=>resolve(1) , 10))
+	.map(x=>{throw 'err'})
+	.chain(x=> {
+		throw 'error'
+		return of(2)
+	})
+	.run()
+	.promise()
+})
+
+it('exception promise', (done) => {
+	// try {
+	// 	await new Promise((res, rej) => setTimeout(()=>{
+	// 		rej('dfafd')
+	// 		// throw new Error('eee')
+	// 		// res(1)
+	// 	}, 10))
+	// 	done()
+	// }
+	// catch (e) {
+	// 	console.log('here')
+	// 	done.fail(e)
+	// }
+	
+	// setTimeout(()=>{
+	// 	expect(true).toEqual(false)
+	// 	done()
+	// }, 10)
+	
+		setTimeout(() => {
+			throw new Error('async fail');
+			done(); // eslint-disable-line
+		}, 1);
 })

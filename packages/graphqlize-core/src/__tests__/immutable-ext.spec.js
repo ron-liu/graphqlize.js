@@ -1,6 +1,7 @@
 import {List, Range} from 'immutable-ext'
 import {taskOf} from "../util/hkt";
 import {K} from "../util/functions";
+import {tap} from "ramda";
 
 test('traverse List empty array should still return task', async () => {
 	await List([])
@@ -26,11 +27,12 @@ test('sequentially', async () => {
 	)
 	.traverse(of, f => f())
 	.map(x=>x.toArray())
+	.map(tap(console.log))
 	.run()
 	.promise()
 })
 
-test('sequentially using ap', async () => {
+test.skip('sequentially using ap', async () => {
 	const {List} = require('immutable-ext')
 	
 	await List.of(
@@ -44,7 +46,7 @@ test('sequentially using ap', async () => {
 	.promise()
 })
 
-test('sequentially using List', async () => {
+test.skip('sequentially using List', async () => {
 	const {List} = require('immutable')
 	List.prototype.traverse = function(point, f) {
 		return this.reduce((ys, x) =>

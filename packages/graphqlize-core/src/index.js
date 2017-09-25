@@ -4,7 +4,7 @@ import {getOption} from './option'
 import {getAst} from './ast'
 import {getRelationshipsFromAst} from './relationship'
 import {defineSequelize, initSequelize, registerGetDbService, sync} from './db'
-import {getModels} from './model'
+import {getModels, registerGetModelInfoService} from './model'
 import {buildAndAddGetModelConnectorsServices} from './connector'
 import {printJson} from "./util/misc";
 import {addBuiltInModelServices} from "./inject";
@@ -25,6 +25,7 @@ const graphqlize : Graphqlize = async (option = {}) => {
 		])
 		
 		yield taskAll([
+			registerGetModelInfoService({option: validatedOption, models, relationships}),
 			defineSequelize({db, relationships, models, option}),
 			buildAndAddGetModelConnectorsServices({option: validatedOption, db, models}),
 			addBuiltInModelServices({option: validatedOption, models, relationships})
