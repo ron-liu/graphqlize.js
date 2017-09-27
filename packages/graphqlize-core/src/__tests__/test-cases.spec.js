@@ -36,25 +36,16 @@ List(getFiles(`${__dirname}/test-suites/**/*.js`))
 			await graphqlize(option)
 			done()
 		})
-		
 		List(cases)
 		.forEach(aCase => it(aCase.name, async() => {
 			const {arrange, act, assert} = aCase
 			return core.getService('initData')(arrange)
-			.then(() => {
-				return List(range(0, length(act)))
-				.traverse(taskOf, i => {
-					const aActs = act[i]
-					const aAsserts = assert[i]
-					return List(aActs)
-					.traverse(taskOf, runServiceT)
-					.map(xs => xs.findLast(K(true)))
-					.chain(assertT(aAsserts))
-				})
+			.then(() => List(act)
+				.traverse(taskOf, runServiceT)
+				.map(xs => xs.findLast(K(true)))
+				.chain(assertT(assert))
 				.run().promise()
-			})
+			)
 		}))
-		
-		
 	})
 })

@@ -15,13 +15,11 @@ export default {
 				]
 			},
 			act: [
-				[
-					['findAllPost', { filter: {content: 'hi'} } ]
-				],
+				['findAllPost', { filter: {content: 'hi'} } ]
 			],
-			assert: [
-				{ toHaveLength: 1 }
-			]
+			assert: {
+				toHaveLength: 1
+			}
 		}
 	]
 }
