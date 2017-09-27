@@ -27,6 +27,7 @@
     "babel-preset-flow": "^6.23.0",
     "babel-preset-stage-1": "^6.24.1",
     "fantasy-do": "^1.1.0",
+    "glob": "^7.1.2",
     "jest": "^21.1.0",
     "jest-babel": "^1.0.1",
     "sqlite3": "^3.1.12"
@@ -45,6 +46,7 @@
     "verbose": true,
     "testMatch": [
       "**/__tests__/*.spec.js"
-    ]
+    ],
+    "testEnvironment": "node"
   }
 }

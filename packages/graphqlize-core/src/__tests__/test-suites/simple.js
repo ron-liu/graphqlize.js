@@ -1,6 +1,4 @@
-import {runTestCases} from './shared'
-
-const testCases = {
+export default {
 	types: [`
 		type Post {
 			content: String,
@@ -9,6 +7,7 @@ const testCases = {
 	`],
 	cases: [
 		{
+			name: 'findAll',
 			arrange: {
 				Post: [
 					{content: 'hi', likes: 2},
@@ -26,7 +25,3 @@ const testCases = {
 		}
 	]
 }
-
-it('should work', async () => {
-	await runTestCases(testCases)
-})

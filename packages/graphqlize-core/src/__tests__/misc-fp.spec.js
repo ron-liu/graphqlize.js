@@ -107,26 +107,8 @@ test.skip('exception', async() => {
 })
 
 it.skip('exception promise', (done) => {
-	// try {
-	// 	await new Promise((res, rej) => setTimeout(()=>{
-	// 		rej('dfafd')
-	// 		// throw new Error('eee')
-	// 		// res(1)
-	// 	}, 10))
-	// 	done()
-	// }
-	// catch (e) {
-	// 	console.log('here')
-	// 	done.fail(e)
-	// }
-	
-	// setTimeout(()=>{
-	// 	expect(true).toEqual(false)
-	// 	done()
-	// }, 10)
-	
-		setTimeout(() => {
-			throw new Error('async fail');
-			done(); // eslint-disable-line
-		}, 1);
+	setTimeout(() => {
+		throw new Error('async fail');
+		done(); // eslint-disable-line
+	}, 1);
 })
