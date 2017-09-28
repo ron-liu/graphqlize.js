@@ -2,8 +2,8 @@ import {getModelConnectorName} from './connector'
 import {
 	promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
 	__, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
-	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter,
-	List, merge
+	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter, merge,
+	List
 } from "./util"
 import {queryOperators} from "./schema"
 import {applySpec, converge, fromPairs, isEmpty, pair, pathEq, propEq, tap} from "ramda";
@@ -114,8 +114,8 @@ export const findAll = ({models, model, relationships}) => async (
 						[fieldName]: {
 							[
 								Box(operator)
-									.map(when(equals('like'), K('iLike'))) // 让pg 大小写不敏感
-									.map(when(equals('notLike'), K('notILike'))) // 让pg 大小写不敏感
+									// .map(when(equals('like'), K('iLike'))) // 让pg 大小写不敏感
+									// .map(when(equals('notLike'), K('notILike'))) // 让pg 大小写不敏感
 									.fold(concat('$'))
 								]: value
 						}

@@ -3,7 +3,7 @@ import {tap, List, taskOf, task, Map, length, K} from '../util'
 import {createCore} from "injectable-core";
 import graphqlize from "../index";
 import initData from '../init-data'
-import {promiseToTask, taskTry} from "../util/hkt";
+import {promiseToTask, taskRejected, taskTry} from "../util/hkt";
 import {range} from "ramda";
 import path from 'path'
 
@@ -23,7 +23,7 @@ List(getFiles(`${__dirname}/test-suites/**/*.js`))
 	const suite = require(file).default
 	const {types, cases} = suite
 	let core
-	const runServiceT = ([serviceName, args]) => promiseToTask(core.getService(serviceName)(args))
+	const runServiceT = ({serviceName, args}) => promiseToTask(core.getService(serviceName)(args))
 	const assertT = rules => result => Map(rules)
 	.traverse(taskOf, (v, k) => taskTry(() => expect(result)[k](v)))
 	
@@ -36,16 +36,23 @@ List(getFiles(`${__dirname}/test-suites/**/*.js`))
 			await graphqlize(option)
 			done()
 		})
+		
 		List(cases)
 		.forEach(aCase => it(aCase.name, async() => {
-			const {arrange, act, assert} = aCase
-			return core.getService('initData')(arrange)
-			.then(() => List(act)
-				.traverse(taskOf, runServiceT)
-				.map(xs => xs.findLast(K(true)))
-				.chain(assertT(assert))
+			const {init, acts} = aCase
+			return core.getService('initData')(init)
+			.then(() => {
+				return List(acts)
+				.traverse(taskOf, ([serviceName, args, assert]) => {
+					return runServiceT({serviceName, args})
+					.chain(assertT(assert))
+					.orElse(e => {
+						console.error(`test-case Error: ${serviceName} ${JSON.stringify(args)} ${JSON.stringify(assert)}`)
+						return taskRejected(e)
+					})
+				})
 				.run().promise()
-			)
+			})
 		}))
 	})
 })
