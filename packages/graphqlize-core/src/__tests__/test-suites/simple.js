@@ -15,7 +15,7 @@ export default {
 				]
 			},
 			acts: [
-				[ 'findAllPost', { filter: {content: 'hi'} } ,  { toHaveLength: 11 } ],
+				[ 'findAllPost', { filter: {content: 'hi'} } ,  { toHaveLength: 1 } ],
 				[ 'findAllPost', { filter: {content: 'nothing'} }, { toHaveLength: 0 } ],
 				[ 'findAllPost', { filter: {content_like: 'h%'} }, { toHaveLength: 2 } ],
 				[ 'findAllPost', { filter: {content_gte: 'hello'} }, { toHaveLength: 2 } ],

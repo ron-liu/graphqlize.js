@@ -181,7 +181,7 @@ export const findAll = ({models, model, relationships}) => async (
 			limit: take,
 			order: Box(orderBy)
 				.map(map(converge(pair, [prop('column'), prop('direction')])))
-				.fold(concat(__, [['id', 'Asc']]))
+				.fold(when(K(after), concat(__, [['id', 'Asc']])))
 			
 		})
 	}).run().promise()
