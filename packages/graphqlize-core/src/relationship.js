@@ -10,6 +10,7 @@ import {FIELD_KIND, TYPE_KIND} from './constants'
 import {Failure, Success, collect} from 'folktale/validation'
 import Result from 'folktale/result'
 import {taskTry, validationToTask} from "./util/hkt";
+import {sortBy} from "ramda";
 
 const getBaseTypeFromField = pipe(
 	prop('type'),
@@ -81,8 +82,8 @@ const generateRelationship = applySpec({
 		from: applySpec({
 			multi: ifElse(
 				pipe(length, equals(1)),
-				K(false),
-				pipe(last, prop('isList'))
+				pipe(head, prop('isList'), not),
+				pipe(last, prop('isList')),
 			),
 			model: pipe(head, prop('objectName')),
 			as: pipe(head, prop('name'))
@@ -101,7 +102,7 @@ const generateRelationship = applySpec({
 const addForeignKey = relationship => {
 	const {
 		from:{multi: fromMulti, as: fromAs, model: fromModelName},
-		to: {to: toMulti, as: toAs, model: toModelName}
+		to: {multi: toMulti, as: toAs, model: toModelName}
 	} = relationship
 	
 	const onFromForeignKey = lensPath(['from', 'foreignKey'])
@@ -115,8 +116,11 @@ const addForeignKey = relationship => {
 	}
 	
 	const foreignKey = !fromMulti
-		? toAs ? `${toAs}Id` :  `id_for_${fromModelName}_${fromAs}` // 1-n
-		: `${fromAs}Id` // // n-1 or 1-1
+		? (toMulti
+			? (toAs ? `${toAs}Id` :  `id_for_${fromModelName}_${fromAs}`) // 1-n
+			: (`${fromAs}Id`)
+		) // 1-1
+		: `${fromAs}Id` // // n-1
 	
 	return Box(relationship)
 		.map(set(onFromForeignKey, foreignKey))
@@ -130,6 +134,7 @@ export const getRelationshipsFromAst = ast => taskOf(ast) // Ok ast
 	.chain(extractTypesFields)
 	.map(groupBy(prop('relationName')))
 	.map(values)
+	.map(map(sortBy(prop('objectName'))))
 	.map(map(generateRelationship))
 	.map(map(addForeignKey))
 

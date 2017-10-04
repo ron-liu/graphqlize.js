@@ -1,37 +1,44 @@
 import {getAst} from '../ast'
 import {getModelRelationships, getRelationshipsFromAst} from '../relationship'
-
-test('1-n should work', async () => {
-	const types = [
-		`type Post {
-		  id: ID
-		  name: String,
-		  comments: [Comment] @relation(name: "PostComment")
-		}`,
-		`type Comment {
-		  id: ID
-		  content: String
-		}`
-	]
-	const relationships = await getAst({schema:{types}})
-		.chain(getRelationshipsFromAst)
-		.run()
-		.promise()
-	
-	
-	expect(relationships).toEqual([
-		{
+import {List, taskOf} from '../util'
+const cases = [
+	{ // 1-n
+		types: [
+			`
+			type Post {
+				id: ID
+				name: String,
+				comments: [Comment] @relation(name: "PostComment")
+			}
+			type Comment {
+				id: ID
+			}
+		`],
+		expected: [{
 			from: {multi: false, model: 'Post', as: "comments", foreignKey: 'id_for_Post_comments'},
 			to: {multi: true, model: 'Comment', foreignKey: 'id_for_Post_comments'},
-		}
-	])
-})
-
-
-describe ('n-1 1-n should work', () => {
-	let relationships
-	beforeAll(async done => {
-		const types = [
+		}]
+	},
+	{ // n-1
+		types: [
+			`
+			type Student {
+			  id: ID
+			  name: String,
+			  school: School @relation(name: "SchoolStudent")
+			}
+			type School {
+				id: ID
+			}
+			
+			`],
+		expected: [{
+			from: {multi: true, model: 'Student', as: "school", foreignKey: 'schoolId'},
+			to: {multi: false, model: 'School', foreignKey: 'schoolId'},
+		}]
+	},
+	{ // n-1 and 1-n
+		types: [
 			`type Post {
 		  id: ID
 		  name: String,
@@ -42,33 +49,36 @@ describe ('n-1 1-n should work', () => {
 		  content: String
 		  post: Post @relation(name: "PostComment")
 		}`
-		]
-		relationships = await getAst({schema:{types}})
+		],
+		expected: [{
+			to: {multi: false, model: 'Post', as: "comments", foreignKey: 'postId'},
+			from: {multi: true, model: 'Comment', as: "post", foreignKey: 'postId'},
+		}]
+	},
+	{ // 1-1
+		types: [`
+			type User {
+			  id: ID
+			  account: Account @relation(name: "userAccount")
+			}
+			type Account {
+				id: ID
+				user: User @relation(name: "userAccount")
+			}
+		`],
+		expected: [{
+			from: {multi: false, model: 'Account', as: "user", foreignKey: 'userId'},
+			to: {multi: false, model: 'User', as: "account", foreignKey: 'userId'},
+		}]
+	}
+]
+
+test('should work', async() => {
+	await List(cases)
+	.traverse(taskOf, ({types, expected}) => getAst({schema:{types}})
 		.chain(getRelationshipsFromAst)
-		.run()
-		.promise()
-		
-		done()
-	})
-	
-	test('n-1 1-n should work', async () => {
-		expect(relationships).toEqual([
-			{
-				from: {multi: false, model: 'Post', as: "comments", foreignKey: 'postId'},
-				to: {multi: true, model: 'Comment', as: "post", foreignKey: 'postId'},
-			}
-		])
-	})
-	
-	test('getModelRelationship should work', () => {
-		expect(getModelRelationships(relationships, 'Comment')).toEqual([
-			{
-				from: {multi: true, model: 'Comment', as: "post", foreignKey: 'postId'},
-				to: {multi: false, model: 'Post', foreignKey: 'postId'},
-			}
-		])
-	})
+		.map(x => expect(x).toEqual(expected))
+	).run().promise()
 })
 
-//todo: 1-n 1-1 n-n tests, and other edge cases tests
-//todo: shall support validation
+//todo: 缺getModelRelationships
