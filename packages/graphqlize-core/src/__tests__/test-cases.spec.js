@@ -1,31 +1,50 @@
 import {getFiles} from './shared'
-import {tap, List, taskOf, task, Map, length, K} from '../util'
+import {
+	tap, List, taskOf, task, Map, length, K, prop, any, Box, ifElse, I, filter, map, pipe, over, lensProp, reduce
+} from '../util'
 import {createCore} from "injectable-core";
 import graphqlize from "../index";
 import initData from '../init-data'
 import {promiseToTask, taskRejected, taskTry} from "../util/hkt";
 import {range} from "ramda";
 import path from 'path'
+import {isArray} from "../util/functions";
 
 const createGraphqlizeOption = (core, types) => ({
 	schema: { types},
 	connection: {
 		option: {
 			dialect: 'sqlite',
+			storage: 'abc.sqlite3',
 			sync: {force: true}
 		}
 	},
 	core
 })
 
-List(getFiles(`${__dirname}/test-suites/**/*.js`))
-.map(file => {
-	const suite = require(file).default
-	const {types, cases} = suite
+Box(getFiles(`${__dirname}/test-suites/**/*.js`))
+.map(map(file => ({file, ...require(file).default})))
+.map(ifElse(
+	any(prop('only')),
+	filter(prop('only')),
+	I
+))
+.fold(List)
+.map(suite => {
+	const {types, cases, file} = suite
 	let core
 	const runServiceT = ({serviceName, args}) => promiseToTask(core.getService(serviceName)(args))
-	const assertT = rules => result => Map(rules)
-	.traverse(taskOf, (v, k) => taskTry(() => expect(result)[k](v)))
+	const assertT = rules => result => {
+		const _assertT = (ruleMap, value) => Map(ruleMap)
+			.traverse(taskOf, (v, k) => value.chain( x => taskTry(() => expect(x)[k](v))))
+			.chain(K(value))
+		
+		const reduceFunc = (currentValue, r) => {
+			if (typeof r === 'function') return currentValue.map(r)
+			else return _assertT(r, currentValue)
+		}
+		return reduce(reduceFunc, taskOf(result), isArray(rules) ? rules : [rules])
+	}
 	
 	describe(path.basename(file), () => {
 		

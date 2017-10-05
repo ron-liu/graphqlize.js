@@ -1,9 +1,9 @@
-import {getModelConnectorName} from './connector'
+import {getModelConnectorName, getModelConnectorNameByModelName} from './connector'
 import {
 	promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
 	__, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
 	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter, merge,
-	List
+	List, either, both
 } from "./util"
 import {queryOperators} from "./schema"
 import {applySpec, converge, fromPairs, isEmpty, pair, pathEq, propEq, tap} from "ramda";
@@ -85,6 +85,7 @@ export const findAll = ({models, model, relationships}) => async (
 	
 	// {operator, value} -> Task WhereAndInclude
 	const getOperatorWhereAndInclude = theModel => ({fieldOperator, value}) => {
+		console.log(1110, 0)
 		const ofWheresAndConcatIncludes = op => value => {
 			const ret = value.map(x => getWhereAndInclude(theModel, x))
 			return taskOf({
@@ -97,6 +98,7 @@ export const findAll = ({models, model, relationships}) => async (
 			return ofWheresAndConcatIncludes(fieldOperator === 'AND' ? '$and' : '$or')
 		}
 		
+		console.log(1110, 1)
 		const fieldName = Box(fieldOperator)
 			.fold(ifElse(
 				pipe(split('_'), last, notContains(__, keys(queryOperators))),
@@ -124,9 +126,9 @@ export const findAll = ({models, model, relationships}) => async (
 			case FIELD_KIND.RELATION:
 				const theModelRelationships = getModelRelationships(relationships, theModel.name)
 				const {from, to} = theModelRelationships.find(x=>x.from.as === fieldName)
-				const getConnectorOfTo = getService({name: `${getModelConnectorName(to.model)}`})
+				const getConnectorOfTo = getService({name: `${getModelConnectorNameByModelName(to.model)}`})
 				
-				const modelOfTo = models.find(x=>x.name === to.as)
+				const modelOfTo = models.find(x=>x.name === to.model)
 				if (isList) { // 1-n
 					return taskDo(function *() {
 						const connectorOfTo = yield taskifyPromiseFn(getConnectorOfTo)()
@@ -140,20 +142,22 @@ export const findAll = ({models, model, relationships}) => async (
 					})
 				} else {
 					const sequelizeModel = db.model(to.model)
+					console.log(1111, 1)
 					return getWhereAndInclude(modelOfTo, value)
-						.map(({where, include}) => {
-							return {
-								where: Box(where)
-									.map(toPairs)
-									.map(map(([name, value])=> [
-										`$${from.as}.${name.replace('$', '')}$`,
-										value
-										]
-									))
-									.fold(fromPairs),
-								include: [{model: sequelizeModel, as: from.as, include }]
-							}
-						})
+					.map(tap(x=>console.log(1111, 3, x)))
+					.map(({where, include}) => {
+						return {
+							where: Box(where)
+								.map(toPairs)
+								.map(map(([name, value])=> [
+									`$${from.as}.${name.replace('$', '')}$`,
+									value
+									]
+								))
+								.fold(fromPairs),
+							include: [{model: sequelizeModel, as: from.as, include }]
+						}
+					})
 				}
 				
 			default: return taskOf({})
@@ -162,12 +166,15 @@ export const findAll = ({models, model, relationships}) => async (
 	
 	// (Models, Model) -> filter -> sequelize's where
 	function getWhereAndInclude (theModel, filter={}) {
+		console.log(2222, 1)
 		return taskOf(filter)
 		.map(toPairs)
 		.map(map(applySpec({fieldOperator: path([0]), value: path([1])})))
+		.map(tap(x=>console.log(1234, 5, x)))
 		.chain(x => List(x)
 			.traverse(taskOf, getOperatorWhereAndInclude(theModel))
 		)
+		.map(tap(x=>console.log(1234, 6, x)))
 		.map(reduce(mergeWheresAndConcatIncludes, {where: {}, include: []}))
 	}
 	
@@ -226,15 +233,17 @@ export const create =  ({models, model, relationships}) => async (
 	// itself
 	// fields -> Task Model
 	const createModel = fields => taskOf(fields)
+	.map(tap(x=>console.log(8889, x)))
 	.chain(pipe(
 		modelConnector.create,
-		promiseToTask
+		promiseToTask,
+		map(x=>x.get())
 	))
 	
 	// 1-n
 	// id -> Task void
 	const create1ToNs = id => taskOf(modelRelationships)
-	.map(filter(pathEq(['from', 'multi'], false)))
+	.map(filter(both(path(['from', 'as']), path(['to', 'multi']))))
 	.map(filter(pipe(path(['from', 'as']), prop(__, input))))
 	.chain(relationships => List(relationships)
 		.traverse(taskOf, ({from, to}) => List(prop(from.as, input))
@@ -245,7 +254,7 @@ export const create =  ({models, model, relationships}) => async (
 	// ids
 	// id -> Task void
 	const create1ToNIds = id => taskOf(modelRelationships)
-	.map(filter(pathEq(['from', 'multi'], false)))
+	.map(filter(both(path(['from', 'as']), path(['to', 'multi']))))
 	.map(filter(pipe(path(['from', 'as']), concat(__, 'Ids'), prop(__, input))))
 	.chain(relationships => List(relationships)
 		.traverse(taskOf, ({from, to}) => updateSubModelT(
@@ -258,9 +267,12 @@ export const create =  ({models, model, relationships}) => async (
 	
 	return taskDo(function * () {
 		const ids = yield createNTo1s
+		console.log(8888, ids)
 		const ret = yield createModel({...input, ...ids})
 		yield List.of(create1ToNIds, create1ToNs)
-			.traverse(taskOf, f => f(ret.id))
+			.traverse(taskOf, f => {
+				return f(ret.id)
+			})
 		return taskOf(ret)
 	}).run().promise()
 }

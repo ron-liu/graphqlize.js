@@ -5,11 +5,15 @@ import {
 import SequelizeModel from 'sequelize/lib/model'
 import {omit} from "ramda";
 
+export const getModelConnectorNameByModelName = modelName => Box(modelName)
+.map(capitalize)
+.map(concat('get'))
+.fold(concat(__, 'Connector'))
+
 export const getModelConnectorName = model => Box(model)
-	.map(prop('name'))
-	.map(capitalize)
-	.map(concat('get'))
-	.fold(concat(__, 'Connector'))
+.map(prop('name'))
+.fold(getModelConnectorNameByModelName)
+
 
 const buildAndAddGetModelConnectorService = ({option, db, model}) => taskTry(
 	() => Box(option)

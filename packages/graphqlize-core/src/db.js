@@ -2,7 +2,7 @@ import Sequelize from 'sequelize'
 import { GraphqlizeOption, Connection, Db} from './types'
 import {
 	Box, pipe, props, K, curry, prop, isNil, promiseToTask, Task, map, ifElse, tap, path, taskOf, taskTry,
-	applySpec, converge, pair, fromPairs, forEach, propSatisfies, isNotNil, filter
+	applySpec, converge, pair, fromPairs, forEach, propSatisfies, isNotNil, filter, when, assoc
 } from './util'
 import {CurriedFn2, Fn1} from './basic-types'
 
@@ -44,8 +44,10 @@ const getSequelizeModelDefinitions = pipe(
 			type: prop('sequelizeType'),
 			allowNull: ifElse(prop('isList'), prop('allowNullList'), prop('allowNull')),
 			primaryKey: prop('primaryKey'),
-			unique: prop('isUnique')
-		})
+			unique: prop('isUnique'),
+			defaultValue: ifElse(prop('primaryKey'), K(Sequelize.UUIDV4), K(undefined))
+		}),
+		
 	])),
 	fromPairs
 )
@@ -65,11 +67,13 @@ const defineSequelizeModels = (db, models) => taskTry(
 
 const defineSequelizeRelations = (db, relationships) => taskTry(
 	() => {
+		console.log(7777, 0, relationships)
 		relationships.forEach(
 			({
 				from:{multi: fromMulti, as: fromAs, model: fromModelName, foreignKey: fromForeignKey},
 				to: {to: toMulti, as: toAs, model: toModelName, foreignKey: toForeignKey}
 			}) => {
+				console.log(7777, fromModelName, toModelName)
 				const FromModel = db.model(fromModelName)
 				const ToModel = db.model(toModelName)
 				
@@ -81,7 +85,7 @@ const defineSequelizeRelations = (db, relationships) => taskTry(
 				}
 				
 				// n-1 or 1-1
-				if (!fromMulti) {
+				if (fromMulti) {
 					FromModel.belongsTo(ToModel, {as: fromAs, foreignKey: fromForeignKey})
 					toAs && ToModel[fromMulti ? 'hasMany' : 'hasOne'](FromModel, {as: toAs})
 					return
@@ -96,5 +100,8 @@ const defineSequelizeRelations = (db, relationships) => taskTry(
 )
 
 export const defineSequelize = ({option, db, relationships, models}) => defineSequelizeModels(db, models)
-	.chain(() => defineSequelizeRelations(db, relationships))
+	.chain(() => {
+		console.log(7777, -1, relationships)
+		return defineSequelizeRelations(db, relationships)
+	})
 	.chain(()=>sync(option, db))
