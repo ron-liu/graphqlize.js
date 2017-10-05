@@ -1,7 +1,6 @@
 import {length, add} from '../../util'
 
 export default {
-	only: true,
 	types: [`
 		type Post {
 			id: ID

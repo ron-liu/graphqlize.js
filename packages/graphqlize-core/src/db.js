@@ -100,8 +100,5 @@ const defineSequelizeRelations = (db, relationships) => taskTry(
 )
 
 export const defineSequelize = ({option, db, relationships, models}) => defineSequelizeModels(db, models)
-	.chain(() => {
-		console.log(7777, -1, relationships)
-		return defineSequelizeRelations(db, relationships)
-	})
+	.chain(() => defineSequelizeRelations(db, relationships))
 	.chain(()=>sync(option, db))

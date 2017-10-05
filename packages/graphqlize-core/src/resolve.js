@@ -85,7 +85,6 @@ export const findAll = ({models, model, relationships}) => async (
 	
 	// {operator, value} -> Task WhereAndInclude
 	const getOperatorWhereAndInclude = theModel => ({fieldOperator, value}) => {
-		console.log(1110, 0)
 		const ofWheresAndConcatIncludes = op => value => {
 			const ret = value.map(x => getWhereAndInclude(theModel, x))
 			return taskOf({
@@ -98,7 +97,6 @@ export const findAll = ({models, model, relationships}) => async (
 			return ofWheresAndConcatIncludes(fieldOperator === 'AND' ? '$and' : '$or')
 		}
 		
-		console.log(1110, 1)
 		const fieldName = Box(fieldOperator)
 			.fold(ifElse(
 				pipe(split('_'), last, notContains(__, keys(queryOperators))),
@@ -142,9 +140,7 @@ export const findAll = ({models, model, relationships}) => async (
 					})
 				} else {
 					const sequelizeModel = db.model(to.model)
-					console.log(1111, 1)
 					return getWhereAndInclude(modelOfTo, value)
-					.map(tap(x=>console.log(1111, 3, x)))
 					.map(({where, include}) => {
 						return {
 							where: Box(where)
@@ -166,15 +162,12 @@ export const findAll = ({models, model, relationships}) => async (
 	
 	// (Models, Model) -> filter -> sequelize's where
 	function getWhereAndInclude (theModel, filter={}) {
-		console.log(2222, 1)
 		return taskOf(filter)
 		.map(toPairs)
 		.map(map(applySpec({fieldOperator: path([0]), value: path([1])})))
-		.map(tap(x=>console.log(1234, 5, x)))
 		.chain(x => List(x)
 			.traverse(taskOf, getOperatorWhereAndInclude(theModel))
 		)
-		.map(tap(x=>console.log(1234, 6, x)))
 		.map(reduce(mergeWheresAndConcatIncludes, {where: {}, include: []}))
 	}
 	
@@ -233,7 +226,6 @@ export const create =  ({models, model, relationships}) => async (
 	// itself
 	// fields -> Task Model
 	const createModel = fields => taskOf(fields)
-	.map(tap(x=>console.log(8889, x)))
 	.chain(pipe(
 		modelConnector.create,
 		promiseToTask,
@@ -267,7 +259,6 @@ export const create =  ({models, model, relationships}) => async (
 	
 	return taskDo(function * () {
 		const ids = yield createNTo1s
-		console.log(8888, ids)
 		const ret = yield createModel({...input, ...ids})
 		yield List.of(create1ToNIds, create1ToNs)
 			.traverse(taskOf, f => {
