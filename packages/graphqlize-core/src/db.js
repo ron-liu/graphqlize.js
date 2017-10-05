@@ -67,13 +67,11 @@ const defineSequelizeModels = (db, models) => taskTry(
 
 const defineSequelizeRelations = (db, relationships) => taskTry(
 	() => {
-		console.log(7777, 0, relationships)
 		relationships.forEach(
 			({
 				from:{multi: fromMulti, as: fromAs, model: fromModelName, foreignKey: fromForeignKey},
 				to: {to: toMulti, as: toAs, model: toModelName, foreignKey: toForeignKey}
 			}) => {
-				console.log(7777, fromModelName, toModelName)
 				const FromModel = db.model(fromModelName)
 				const ToModel = db.model(toModelName)
 				

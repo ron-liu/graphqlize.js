@@ -86,15 +86,17 @@ export const findAll = ({models, model, relationships}) => async (
 	// {operator, value} -> Task WhereAndInclude
 	const getOperatorWhereAndInclude = theModel => ({fieldOperator, value}) => {
 		const ofWheresAndConcatIncludes = op => value => {
-			const ret = value.map(x => getWhereAndInclude(theModel, x))
-			return taskOf({
-				where: {[op]: ret.map(prop('where'))},
-				include: ret.map(prop('include')).reduce(concat, [])
-			})
+			const ret = List(value).traverse(taskOf, x => getWhereAndInclude(theModel, x))
+			
+			return ret
+			.map(x => x.toArray())
+			.map(applySpec({
+				where: pipe(map(prop('where')), assoc(op, __, {})),
+				include: pipe(map(prop('include')), reduce(concat, []))
+			}))
 		}
-		
 		if (fieldOperator === 'AND' || fieldOperator === 'OR') {
-			return ofWheresAndConcatIncludes(fieldOperator === 'AND' ? '$and' : '$or')
+			return ofWheresAndConcatIncludes(fieldOperator === 'AND' ? '$and' : '$or')(value)
 		}
 		
 		const fieldName = Box(fieldOperator)

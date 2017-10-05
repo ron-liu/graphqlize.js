@@ -24,7 +24,8 @@ export default {
 			acts: [
 				['findAllComment', {}, {toHaveLength: 2} ],
 				['findAllPost', {}, {toHaveLength: 2} ],
-				['findAllComment', {filter: { post: {title: 'no'}}}, {toHaveLength: 1}]
+				['findAllComment', {filter: { post: {title: 'no'}}}, {toHaveLength: 1}],
+				['findAllComment', {filter: { post: {title_like: '%o%'}}}, {toHaveLength: 2}]
 			]
 		}
 	]

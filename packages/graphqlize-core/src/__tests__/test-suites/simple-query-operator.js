@@ -1,4 +1,5 @@
 export default {
+	only: true,
 	types: [`
 		type Post {
 			content: String,
@@ -35,6 +36,8 @@ export default {
 				[ 'findAllPost', { filter: {content_like: 'i%'} }, { toHaveLength: 0 } ],
 				[ 'findAllPost', { filter: {content_notLike: 'h%'} }, { toHaveLength: 0 } ],
 				[ 'findAllPost', { filter: {content_notLike: 'i%'} }, { toHaveLength: 2 } ],
+				[ 'findAllPost', { filter: { AND: [{content_like: 'h%'}, {likes: 2}] }}, { toHaveLength: 1 } ],
+				[ 'findAllPost', { filter: { OR: [{content: 'hi'}, {likes: 3}] }}, { toHaveLength: 2 } ],
 			]
 		}
 	]
