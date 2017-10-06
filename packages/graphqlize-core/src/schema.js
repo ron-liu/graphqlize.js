@@ -67,7 +67,7 @@ const genModelInput : Fn2<GenModelInputOption, Model, string>
 	.map(map(getInputField(option)))
 	.fold(x => buildInput(option.action, model, x))
 
-export const queryOperators = {
+export const basicQueryOperators = {
 	gte: I,
 	gt: I,
 	lt: I,
@@ -81,10 +81,12 @@ export const queryOperators = {
 	notLike: K('String'),
 }
 
+export const oneToNQueryOperators = ['some', 'none']
+
 const getModelFilterName : Fn1<string, string> = typeName => `${capitalize(typeName)}Filter`
 const buildScalarAndEnumColumnFilter : Fn1<Field, [string]> = field => {
 	const {name, graphqlType} = field
-	return Box(queryOperators)
+	return Box(basicQueryOperators)
 		.map(ifElse(
 			K(graphqlType === 'ID'),
 			K([]),
@@ -99,7 +101,7 @@ const buildValueObjectColumnFilter: Fn1<Field, [string]> = field => []
 const buildRelationColumnFilter: Fn1<Field, [string]> = field => Box(field)
 	.fold(ifElse(
 		prop('isList'),
-		K(['some', 'none'].map(x => `${field.name}_${x}:${getModelFilterName(field.graphqlType)}`)),
+		K(oneToNQueryOperators.map(x => `${field.name}_${x}:${getModelFilterName(field.graphqlType)}`)),
 		K([
 			`${field.name}:${getModelFilterName(field.graphqlType)}`,
 			`${field.name}Id:ID`

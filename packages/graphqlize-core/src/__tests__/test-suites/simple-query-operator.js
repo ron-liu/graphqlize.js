@@ -1,5 +1,4 @@
 export default {
-	only: true,
 	types: [`
 		type Post {
 			content: String,

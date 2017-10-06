@@ -36,10 +36,10 @@ const buildAndAddGetModelConnectorService = ({option, db, model}) => taskTry(
 				create: (values, options) => model.create(values, {...options}),
 				getSelectQuery: options => {
 					if (options.include) {
-						SequelizeModel._validateIncludedElements.bind(connector)(options)
+						SequelizeModel._validateIncludedElements.bind(model)(options)
 					}
 					return db.dialect.QueryGenerator
-						.selectQuery(connector.tableName, options, connector)
+						.selectQuery(model.tableName, options, model)
 						.slice(0,-1)
 				}
 			}))

@@ -5,7 +5,7 @@ import {
 	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter, merge,
 	List, either, both
 } from "./util"
-import {queryOperators} from "./schema"
+import {basicQueryOperators, oneToNQueryOperators} from "./schema"
 import {applySpec, converge, fromPairs, isEmpty, pair, pathEq, propEq, tap} from "ramda";
 import {FIELD_KIND} from "./constants";
 import {getModelRelationships} from "./relationship";
@@ -101,12 +101,12 @@ export const findAll = ({models, model, relationships}) => async (
 		
 		const fieldName = Box(fieldOperator)
 			.fold(ifElse(
-				pipe(split('_'), last, notContains(__, keys(queryOperators))),
+				pipe(split('_'), last, notContains(__, keys(basicQueryOperators).concat(oneToNQueryOperators))),
 				K(fieldOperator),
 				pipe(split('_'), init, join('_'))
 			))
 		const operator = Box(fieldOperator).map(split('_')).fold(last)
-		const {isList, fieldKind, graphqlType} = theModel.fields.find(propEq('name', fieldName))
+		const {isList, fieldKind} = theModel.fields.find(propEq('name', fieldName))
 		switch (fieldKind) {
 			case FIELD_KIND.ENUM:
 			case FIELD_KIND.SCALAR:
@@ -124,6 +124,7 @@ export const findAll = ({models, model, relationships}) => async (
 					}
 				})
 			case FIELD_KIND.RELATION:
+				
 				const theModelRelationships = getModelRelationships(relationships, theModel.name)
 				const {from, to} = theModelRelationships.find(x=>x.from.as === fieldName)
 				const getConnectorOfTo = getService({name: `${getModelConnectorNameByModelName(to.model)}`})
@@ -132,9 +133,9 @@ export const findAll = ({models, model, relationships}) => async (
 				if (isList) { // 1-n
 					return taskDo(function *() {
 						const connectorOfTo = yield taskifyPromiseFn(getConnectorOfTo)()
+						
 						const subSql = yield getWhereAndInclude(modelOfTo, value)
 							.map(option => connectorOfTo.getSelectQuery({...option, attributes: [to.foreignKey]}))
-							
 						return taskOf({ where: { id: {
 							[ operator === 'some' ? '$in' : '$notIn']:
 								db.literal(`(${subSql})`)
@@ -241,7 +242,7 @@ export const create =  ({models, model, relationships}) => async (
 	.map(filter(pipe(path(['from', 'as']), prop(__, input))))
 	.chain(relationships => List(relationships)
 		.traverse(taskOf, ({from, to}) => List(prop(from.as, input))
-			.traverse(taskOf, fields => createSubModelT(to.model, fields))
+			.traverse(taskOf, fields => createSubModelT(to.model, {...fields, [from.foreignKey]: id}))
 		)
 	)
 	
