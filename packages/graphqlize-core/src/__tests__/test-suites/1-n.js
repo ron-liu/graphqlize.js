@@ -1,8 +1,7 @@
-import {head} from '../../util'
+import {map, prop} from '../../util'
 import {v4} from 'uuid'
 const commentId1 = v4()
 const commentId2 = v4()
-const commentId3 = v4()
 const postId = v4()
 
 export default {
@@ -48,7 +47,7 @@ export default {
 			},
 			acts: [
 				['updatePost', {input: {id: postId, comments: [{content: '3'}, {id: commentId2, content: '2+'}]}}, {}],
-				['findAllComment', {filter: {postId}}, {toHaveLength: 2}]
+				['findAllComment', {filter: {postId}}, {toHaveLength: 2}, map(prop('content')), { toEqual: expect.arrayContaining(['2+', '3'])}],
 			]
 		}
 	]

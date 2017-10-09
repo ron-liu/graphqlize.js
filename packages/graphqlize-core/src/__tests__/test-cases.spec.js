@@ -68,7 +68,7 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 			return core.getService('initData')(init)
 			.then(() => {
 				return List(acts)
-				.traverse(taskOf, ([serviceName, args, ...assert]) => {
+				.series(taskOf, ([serviceName, args, ...assert]) => {
 					return runServiceT({serviceName, args})
 					.chain(assertT(assert))
 					.orElse(e => {

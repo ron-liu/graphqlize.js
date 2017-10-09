@@ -31,6 +31,12 @@ List.prototype.traverse = function(point, f) {
 		// f(x).map(x => y => y.concat([x])).ap(ys), point(this.empty))
 		ys.map(x => y => x.concat([y])).ap(f(x)), point(this.empty))
 }
+// series
+List.prototype.series = function(point, f) {
+	return this.reduce((ys, x) =>
+		ys.chain(() => f(x)), point(this.empty))
+		// ys.map(x => y => x.concat([y])).ap(f(x)), point(this.empty))
+}
 
 List.prototype.sequence = derived.sequence
 
