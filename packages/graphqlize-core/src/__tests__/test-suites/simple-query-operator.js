@@ -1,4 +1,5 @@
 import {v4} from 'uuid'
+import {prop} from '../../util'
 const id1 = v4()
 export default {
 	types: [`
@@ -76,6 +77,18 @@ export default {
 			acts: [
 				['deletePost', {input: {id: id1}}, {}],
 				['findAllPost', {}, {toHaveLength: 1}]
+			]
+		},
+		{
+			name: "findOne",
+			init: {
+				Post: [
+					{id: id1, content: 'hi', likes: 2},
+					{content: 'hello', likes: 3},
+				]
+			},
+			acts: [
+				['findOnePost', {id: id1}, prop('content'), {toEqual: 'hi'}],
 			]
 		},
 	]

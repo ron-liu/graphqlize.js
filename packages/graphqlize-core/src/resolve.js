@@ -380,3 +380,16 @@ export const del = ({model}) => async (
 	const modelConnector = await getModelConnector()
 	return modelConnector.destroy({where: {id}})
 }
+
+export const getFindOneModelName : Fn1<string, string> = pipe(capitalize, concat('findOne'))
+export const findOne = ({model}) => async (
+	{
+		[getModelConnectorName(model)]: getModelConnector
+	},
+	args = {}
+
+) => {
+	const {id} = args
+	const modelConnector = await getModelConnector()
+	return modelConnector.findOne({where: {id}})
+}

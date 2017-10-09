@@ -7,7 +7,7 @@ import {
 import type {ExposeToGraphqlOption, Model} from './types'
 import {
 	findAll, create, getCreateModelName, getFindAllModelName, getUpdateModelName, update,
-	getDeleteModelName, del
+	getDeleteModelName, del, getFindOneModelName, findOne
 } from './resolve'
 import {getModelConnectorName} from './connector'
 
@@ -37,6 +37,19 @@ const modelNameToDeleteExposeOption: Fn1<Model, ExposeToGraphqlOption>
 			id: K('ID')
 		}),
 		returns: K('Int')
+	})
+)
+
+const modelNameToFindOneExposeOption: Fn1<Model, ExposeToGraphqlOption>
+= pipe(
+	prop('name'),
+	applySpec({
+		name: capitalize,
+		kind: K('query'),
+		args: applySpec({
+			id: K('ID'),
+		}),
+		returns: I
 	})
 )
 
@@ -76,6 +89,12 @@ const allActions = [
 		injects: [ getModelConnectorName],
 		toExposeOption: modelNameToDeleteExposeOption,
 		func: del,
+	},
+	{
+		name: getFindOneModelName,
+		injects: [ getModelConnectorName],
+		toExposeOption: modelNameToFindOneExposeOption,
+		func: findOne,
 	},
 ]
 
