@@ -1,13 +1,16 @@
+import {v4} from 'uuid'
+const id1 = v4()
 export default {
 	types: [`
 		type Post {
+			id: ID,
 			content: String,
 			likes: Int
 		}
 	`],
 	cases: [
 		{
-			name: 'simple-query-operator',
+			name: 'query',
 			init: {
 				Post: [
 					{content: 'hi', likes: 2},
@@ -37,6 +40,29 @@ export default {
 				[ 'findAllPost', { filter: {content_notLike: 'i%'} }, { toHaveLength: 2 } ],
 				[ 'findAllPost', { filter: { AND: [{content_like: 'h%'}, {likes: 2}] }}, { toHaveLength: 1 } ],
 				[ 'findAllPost', { filter: { OR: [{content: 'hi'}, {likes: 3}] }}, { toHaveLength: 2 } ],
+			]
+		},
+		{
+			name: 'create with id',
+			init: {
+				Post: [{id: id1, content: 'concert', likes: 99}]
+			},
+			acts: [
+				['findAllPost', {filter: {id: id1}}, {toHaveLength: 1}]
+			]
+			
+		},
+		{
+			name: "update",
+			init: {
+				Post: [
+					{id: id1, content: 'hi', likes: 2},
+					{content: 'hello', likes: 3},
+				]
+			},
+			acts: [
+				['updatePost', {input: {id: id1, content: 'hiiii', likes: 3}}, {}],
+				['findAllPost', {filter: {content: 'hiiii', likes: 3}}, {toHaveLength: 1}]
 			]
 		}
 	]

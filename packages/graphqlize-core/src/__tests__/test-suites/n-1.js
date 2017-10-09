@@ -1,4 +1,7 @@
-import {length, add} from '../../util'
+import {tap, head} from '../../util'
+import {v4} from 'uuid'
+const commentId = v4()
+const postId1 = v4()
 
 export default {
 	types: [`
@@ -14,7 +17,7 @@ export default {
 	`],
 	cases: [
 		{
-			name: 'n-1',
+			name: 'create and query',
 			init: {
 				Comment: [
 					{content: 'worries', post: {title: 'no'}},
@@ -27,6 +30,18 @@ export default {
 				['findAllComment', {filter: { post: {title: 'no'}}}, {toHaveLength: 1}],
 				['findAllComment', {filter: { post: {title_like: '%o%'}}}, {toHaveLength: 2}]
 			]
-		}
+		},
+		{
+			name: 'update',
+			init: {
+				Comment: [
+					{id: commentId, content: 'worries', post: {id: postId1, title: 'no'}},
+				]
+			},
+			acts: [
+				['updateComment', {input: {id: commentId, post: {id: postId1, title: 'yes'}}}, {}],
+				['findAllPost', {}, {toHaveLength: 1}, head, {toEqual: expect.objectContaining({id: postId1, title: 'yes'})}]
+			]
+		},
 	]
 }

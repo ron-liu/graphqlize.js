@@ -2,7 +2,7 @@ import type {CurriedFn2, Fn1} from './basic-types'
 import {plural} from 'pluralize'
 import {List, prop, capitalize, surround, deCapitalize, K, applySpec, pipe, __, Box, taskTry, concat} from "./util";
 import type {ExposeToGraphqlOption, Model} from './types'
-import {findAll, create, getCreateModelName, getFindAllModelName} from './resolve'
+import {findAll, create, getCreateModelName, getFindAllModelName, getUpdateModelName, update} from './resolve'
 import {getModelConnectorName} from './connector'
 import {converge, fromPairs, pair, tap} from "ramda";
 import {I} from "./util/functions";
@@ -48,6 +48,12 @@ const allActions = [
 		injects: [ K('$getDb'), getModelConnectorName, K('getService') ],
 		toExposeOption: modelToCUUExposeOption(getCreateModelName),
 		func: create,
+	},
+	{
+		name: getUpdateModelName,
+		injects: [ K('$getDb'), getModelConnectorName, K('getService') ],
+		toExposeOption: modelToCUUExposeOption(getCreateModelName),
+		func: update,
 	}
 ]
 

@@ -2,7 +2,7 @@ import Sequelize from 'sequelize'
 import { GraphqlizeOption, Connection, Db} from './types'
 import {
 	Box, pipe, props, K, curry, prop, isNil, promiseToTask, Task, map, ifElse, tap, path, taskOf, taskTry,
-	applySpec, converge, pair, fromPairs, forEach, propSatisfies, isNotNil, filter, when, assoc
+	applySpec, converge, pair, fromPairs, forEach, propSatisfies, isNotNil, filter, when, assoc, notEquals
 } from './util'
 import {CurriedFn2, Fn1} from './basic-types'
 
@@ -37,7 +37,7 @@ export const sync = (option, db) => pipe(
 // [Field] -> {[id:string]: SequelizeFieldDefinition}
 const getSequelizeModelDefinitions = pipe(
 	prop('fields'),
-	filter(propSatisfies(isNotNil, 'sequelizeType')),
+	filter(propSatisfies(notEquals('relation'), 'fieldKind')),
 	map(converge(pair, [
 		prop('name'),
 		applySpec({
@@ -47,9 +47,8 @@ const getSequelizeModelDefinitions = pipe(
 			unique: prop('isUnique'),
 			defaultValue: ifElse(prop('primaryKey'), K(Sequelize.UUIDV4), K(undefined))
 		}),
-		
 	])),
-	fromPairs
+	fromPairs,
 )
 
 const defineSequelizeModels = (db, models) => taskTry(
@@ -85,13 +84,13 @@ const defineSequelizeRelations = (db, relationships) => taskTry(
 				// n-1 or 1-1
 				if (fromMulti) {
 					FromModel.belongsTo(ToModel, {as: fromAs, foreignKey: fromForeignKey})
-					toAs && ToModel[fromMulti ? 'hasMany' : 'hasOne'](FromModel, {as: toAs})
+					// toAs && ToModel[fromMulti ? 'hasMany' : 'hasOne'](FromModel, {as: toAs})
 					return
 				}
 				
 				// 1-n
 				FromModel.hasMany(ToModel, {as: fromAs, foreignKey: fromForeignKey})
-				toAs && ToModel.belongsTo(FromModel, {as: toAs, foreignKey: toForeignKey})
+				// toAs && ToModel.belongsTo(FromModel, {as: toAs, foreignKey: toForeignKey})
 			}
 		)
 	}

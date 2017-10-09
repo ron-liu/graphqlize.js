@@ -6,7 +6,7 @@ import {createCore} from "injectable-core";
 import graphqlize from "../index";
 import initData from '../init-data'
 import {promiseToTask, taskRejected, taskTry} from "../util/hkt";
-import {range} from "ramda";
+import {either, range} from "ramda";
 import path from 'path'
 import {isArray} from "../util/functions";
 
@@ -25,8 +25,8 @@ const createGraphqlizeOption = (core, types) => ({
 Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 .map(map(file => ({file, ...require(file).default})))
 .map(ifElse(
-	any(prop('only')),
-	filter(prop('only')),
+	any(either(prop('only'), pipe(prop('cases'), any(prop('only'))))),
+	filter(either(prop('only'), pipe(prop('cases'), any(prop('only'))))),
 	I
 ))
 .fold(List)
@@ -56,19 +56,29 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 			done()
 		})
 		
-		List(cases)
+		Box(cases)
+		.map(ifElse(
+			any(prop('only')),
+			filter(prop('only')),
+			I
+		))
+		.fold(List)
 		.forEach(aCase => it(aCase.name, async() => {
 			const {init, acts} = aCase
 			return core.getService('initData')(init)
 			.then(() => {
 				return List(acts)
-				.traverse(taskOf, ([serviceName, args, assert]) => {
+				.traverse(taskOf, ([serviceName, args, ...assert]) => {
 					return runServiceT({serviceName, args})
 					.chain(assertT(assert))
 					.orElse(e => {
 						console.error(`test-case Error: ${serviceName} ${JSON.stringify(args)} ${JSON.stringify(assert)}`)
 						return taskRejected(e)
 					})
+				})
+				.orElse(x=>{
+					console.error('error: ', x)
+					return taskRejected(x)
 				})
 				.run().promise()
 			})
