@@ -35,7 +35,6 @@ export default {
 			]
 		},
 		{
-			only: true,
 			name: 'update',
 			init: {
 				Post: [

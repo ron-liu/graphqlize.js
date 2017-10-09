@@ -1,11 +1,15 @@
 import type {CurriedFn2, Fn1} from './basic-types'
 import {plural} from 'pluralize'
-import {List, prop, capitalize, surround, deCapitalize, K, applySpec, pipe, __, Box, taskTry, concat} from "./util";
+import {
+	List, prop, capitalize, surround, deCapitalize, K, applySpec, pipe, __, Box, taskTry, concat, I,
+	converge, fromPairs, pair, tap
+} from "./util";
 import type {ExposeToGraphqlOption, Model} from './types'
-import {findAll, create, getCreateModelName, getFindAllModelName, getUpdateModelName, update} from './resolve'
+import {
+	findAll, create, getCreateModelName, getFindAllModelName, getUpdateModelName, update,
+	getDeleteModelName, del
+} from './resolve'
 import {getModelConnectorName} from './connector'
-import {converge, fromPairs, pair, tap} from "ramda";
-import {I} from "./util/functions";
 
 const modelToFindAllExposeOption : Fn1<Model, ExposeToGraphqlOption>
 = pipe(
@@ -21,6 +25,18 @@ const modelToFindAllExposeOption : Fn1<Model, ExposeToGraphqlOption>
 			orderBy: pipe(concat(__, 'OrderBy'), surround('[', ']'))
 		}),
 		returns: surround('[', ']')
+	})
+)
+
+const modelNameToDeleteExposeOption: Fn1<Model, ExposeToGraphqlOption>
+= pipe(
+	prop('name'),
+	applySpec({
+		kind: K('mutation'),
+		args: applySpec({
+			id: K('ID')
+		}),
+		returns: K('Int')
 	})
 )
 
@@ -54,7 +70,13 @@ const allActions = [
 		injects: [ K('$getDb'), getModelConnectorName, K('getService') ],
 		toExposeOption: modelToCUUExposeOption(getCreateModelName),
 		func: update,
-	}
+	},
+	{
+		name: getDeleteModelName,
+		injects: [ getModelConnectorName],
+		toExposeOption: modelNameToDeleteExposeOption,
+		func: del,
+	},
 ]
 
 // GraphqlizeOption -> [Model] -> Task void

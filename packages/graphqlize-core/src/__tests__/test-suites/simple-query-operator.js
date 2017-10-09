@@ -64,6 +64,19 @@ export default {
 				['updatePost', {input: {id: id1, content: 'hiiii', likes: 3}}, {}],
 				['findAllPost', {filter: {content: 'hiiii', likes: 3}}, {toHaveLength: 1}]
 			]
-		}
+		},
+		{
+			name: "delete",
+			init: {
+				Post: [
+					{id: id1, content: 'hi', likes: 2},
+					{content: 'hello', likes: 3},
+				]
+			},
+			acts: [
+				['deletePost', {input: {id: id1}}, {}],
+				['findAllPost', {}, {toHaveLength: 1}]
+			]
+		},
 	]
 }

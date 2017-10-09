@@ -109,8 +109,8 @@ export const findAll = ({models, model, relationships}) => async (
 		const operator = Box(fieldOperator).map(split('_')).fold(last)
 		const theModelRelationships = getModelRelationships(relationships, theModel.name)
 		const {isList, fieldKind} = theModel.fields.find(propEq('name', fieldName))
-			|| theModelRelationships.find(pathSatisfies(pipe(concat(__, 'Id'), equals(fieldName)), ['from', 'as']))
-				? {isList: false, fieldKind: FIELD_KIND.SCALAR} : {}
+			|| (theModelRelationships.find(pathSatisfies(pipe(concat(__, 'Id'), equals(fieldName)), ['from', 'as']))
+				? {isList: false, fieldKind: FIELD_KIND.SCALAR} : {})
 		switch (fieldKind) {
 			case FIELD_KIND.ENUM:
 			case FIELD_KIND.SCALAR:
@@ -179,6 +179,7 @@ export const findAll = ({models, model, relationships}) => async (
 	return taskDo(function * () {
 		const cursorWhere = yield getCursorWhere(after)
 		const {where, include} = yield getWhereAndInclude(model, filter)
+		console.log(1777, where, include)
 		return modelConnector.findAllT({
 			where: {...cursorWhere, ...where},
 			include,
@@ -375,7 +376,7 @@ export const del = ({model}) => async (
 	args = {}
 
 ) => {
-	const {id} = args
-	const modelConnector = getModelConnector()
-	
+	const {input: {id}} = args
+	const modelConnector = await getModelConnector()
+	return modelConnector.destroy({where: {id}})
 }
