@@ -14,13 +14,15 @@ export default {
 			name: 'query',
 			init: {
 				User: [
-					{id: id1, content: 'hi', likes: 2},
+					{id: id1, name: 'ron', likes: 2},
 				]
 			},
 			acts: [
 				['findOneUser', {id: id1}, {toEqual: expect.anything()}],
 				['findOneUser', {}, {'rejects.toMatch': 'One and Only one'}],
-				// ['findOneUser', {contain: 'hi'}, {toEqual: expect.anything()}],
+				['findOneUser', {name: 'ron'}, {toEqual: expect.anything()}],
+				['findOneUser', {name: 'ang'}, {'rejects.toMatch': 'One and Only one'}],
+				['findOneUser', {name: 'ron', id: id1}, {'rejects.toBeDefined': 'One and Only one'}],
 			]
 		}
 	]

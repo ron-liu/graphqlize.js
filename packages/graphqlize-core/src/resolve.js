@@ -393,11 +393,10 @@ export const findOne = ({model}) => async (
 	.map(map(prop('name')))
 	.fold(reject(pipe(prop(__, args), isNil)))
 	
-	if (names.length !== 1) {
-		return Promise.reject(`One and Only one id or isUnique field is allowed, but you provide ${names.length}`)
+	if (keys(args).length !== 1 || names.length !== 1) {
+		return Promise.reject(`One and Only one id or isUnique field is allowed`)
 	}
 	
-	const {id} = args
 	const modelConnector = await getModelConnector()
-	return modelConnector.findOne({where: {id}})
+	return modelConnector.findOne({where: args})
 }
