@@ -35,7 +35,7 @@ export default {
 			]
 		},
 		{
-			name: 'update',
+			name: 'update sub models',
 			init: {
 				Post: [
 					{id: postId, title: 'holiday', comments: [
@@ -47,6 +47,25 @@ export default {
 			acts: [
 				['updatePost', {input: {id: postId, comments: [{content: '3'}, {id: commentId2, content: '2+'}]}}, {}],
 				['findAllComment', {filter: {postId}}, {toHaveLength: 2}, map(prop('content')), { toEqual: expect.arrayContaining(['2+', '3'])}],
+			]
+		},
+		{
+			only: true,
+			name: 'update sub model ids',
+			init: {
+				Post: [
+					{id: postId, title: 'holiday', comments: [
+						{content: '1'}
+					]},
+				],
+				Comment: [
+					{content: 'good', id: commentId1},
+					{content: 'better', id: commentId2}
+				]
+			},
+			acts: [
+				['updatePost', {input: {id: postId, commentsIds: [commentId1, commentId2]}}, {}],
+				['findAllComment', {filter: {postId}}, {toHaveLength: 2}, map(prop('content')), { toEqual: expect.arrayContaining(['good', 'better'])}],
 			]
 		}
 	]

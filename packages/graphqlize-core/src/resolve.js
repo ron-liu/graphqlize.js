@@ -204,6 +204,12 @@ const fetch1ToNIdsRelationships = (mRelationship, input) => taskOf(mRelationship
 .map(filter(both(path(['from', 'as']), path(['to', 'multi']))))
 .map(filter(pipe(path(['from', 'as']), concat(__, 'Ids'), prop(__, input))))
 
+const _updateSubModelT = getService => (modelName, fields, where) => {
+	const getModelConnector = getService({name: getModelConnectorNameByModelName(modelName)})
+	return promiseToTask(getModelConnector())
+	.chain(x => x.updateT(fields, {where}))
+}
+
 export const getCreateModelName : Fn1<string, string> = pipe(capitalize, concat('create'))
 export const create =  ({models, model, relationships}) => async (
 	{
@@ -222,10 +228,7 @@ export const create =  ({models, model, relationships}) => async (
 		return promiseToTask(service({input: fields}))
 	}
 	
-	const updateSubModelT = (modelName, fields, where) => {
-		const connector = getService({name: getModelConnectorName(modelName)})
-		return connector.updateT(fields, {where})
-	}
+	const updateSubModelT = _updateSubModelT(getService)
 	
 	// n-1, create all n-1 relationship models and merge fk ids back to input
 	// Task {[fkId]: ID}
@@ -344,16 +347,25 @@ export const update =  ({models, model, relationships}) => async (
 		})
 	)
 	
+	const updateSubModelT = _updateSubModelT(getService)
 	// ids
 	// id -> Task void
 	const update1ToNIds = () => fetch1ToNIdsRelationships(modelRelationships, input)
 	.chain(relationships => List(relationships)
-		.traverse(taskOf, ({from, to}) => updateSubModelT(
-			to.model,
-			{[to.foreignKey]: id},
-			{id: {$in: prop(`${from.as}Ids`, input)}}
-			)
-		)
+		.traverse(taskOf, ({from, to}) =>{
+			const ids = prop(`${from.as}Ids`, input)
+			return (isEmpty(ids)
+				? taskOf()
+				: delModelT(to.model, {
+					[to.foreignKey]: id,
+					id: {$notIn: ids}
+				}))
+			.chain(() => updateSubModelT(
+				to.model,
+				{[to.foreignKey]: id},
+				{id: {$in: ids}}
+			))
+		})
 	)
 	
 	return taskDo(function * () {
