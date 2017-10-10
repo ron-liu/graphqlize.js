@@ -3,7 +3,7 @@ import {
 	promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
 	__, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
 	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter, merge,
-	List, either, both
+	List, either, both, reject
 } from "./util"
 import {basicQueryOperators, oneToNQueryOperators} from "./schema"
 import {applySpec, converge, fromPairs, isEmpty, pair, pathEq, pathSatisfies, propEq, tap} from "ramda";
@@ -179,7 +179,6 @@ export const findAll = ({models, model, relationships}) => async (
 	return taskDo(function * () {
 		const cursorWhere = yield getCursorWhere(after)
 		const {where, include} = yield getWhereAndInclude(model, filter)
-		console.log(1777, where, include)
 		return modelConnector.findAllT({
 			where: {...cursorWhere, ...where},
 			include,
@@ -360,7 +359,7 @@ export const update =  ({models, model, relationships}) => async (
 	return taskDo(function * () {
 		const ids = yield updateNTo1s
 		const ret = yield updateModel({...input, ...ids})
-		yield List.of(update1ToNs, update1ToNs)
+		yield List.of(update1ToNs, update1ToNIds)
 		.traverse(taskOf, f => {
 			return f()
 		})
@@ -389,6 +388,15 @@ export const findOne = ({model}) => async (
 	args = {}
 
 ) => {
+	const names = Box(model.fields)
+	.map(filter(prop('isUnique')))
+	.map(map(prop('name')))
+	.fold(reject(pipe(prop(__, args), isNil)))
+	
+	if (names.length !== 1) {
+		return Promise.reject(`One and Only one id or isUnique field is allowed, but you provide ${names.length}`)
+	}
+	
 	const {id} = args
 	const modelConnector = await getModelConnector()
 	return modelConnector.findOne({where: {id}})

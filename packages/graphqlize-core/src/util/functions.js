@@ -7,7 +7,7 @@ export {
 	head, toUpper, tail, of, toLower, pipe, curry, objOf, __, propOr, has, uniq, groupBy, either, is, all,
 	and, set, lensPath, reduce, view, last, apply, keys, call, curryN, mergeWith, remove, split, both, F, toString,
 	gt, lt, gte, lte, zipObj, forEachObjIndexed, pathSatisfies, add, propSatisfies, pickBy, multiply, any, compose, isEmpty, concat,
-	identity as I,
+	identity as I, startsWith,
 	always as K
 } from 'ramda'
 

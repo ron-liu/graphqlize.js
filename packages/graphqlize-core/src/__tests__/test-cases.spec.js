@@ -1,14 +1,15 @@
 import {getFiles} from './shared'
 import {
-	tap, List, taskOf, task, Map, length, K, prop, any, Box, ifElse, I, filter, map, pipe, over, lensProp, reduce
+	tap, List, taskOf, task, Map, length, K, prop, any, Box, ifElse, I, filter, map, pipe, over, lensProp,
+	reduce, split, startsWith
 } from '../util'
 import {createCore} from "injectable-core";
 import graphqlize from "../index";
 import initData from '../init-data'
-import {promiseToTask, taskRejected, taskTry} from "../util/hkt";
-import {either, range} from "ramda";
+import {promiseToTask, taskAll, taskDo, taskRejected, taskTry} from "../util/hkt";
+import {either, isNil, range} from "ramda";
 import path from 'path'
-import {isArray} from "../util/functions";
+import {isArray, isNotNil} from "../util/functions";
 
 const createGraphqlizeOption = (core, types) => ({
 	schema: { types},
@@ -33,14 +34,30 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 .map(suite => {
 	const {types, cases, file} = suite
 	let core
-	const runServiceT = ({serviceName, args}) => promiseToTask(core.getService(serviceName)(args))
-	const assertT = rules => result => {
-		const _assertT = (ruleMap, value) => Map(ruleMap)
-			.traverse(taskOf, (v, k) => value.chain( x => taskTry(() => expect(x)[k](v))))
+	const runService = ({serviceName, args}) => core.getService(serviceName)(args)
+	
+	const assertT = (rules, result) => {
+		const _assertT = (ruleMap, value) => {
+			return Map(ruleMap)
+			.traverse(taskOf, (expectedValue, k) =>
+				value.chain( x => {
+					const check = actualValue => {
+						const assert = reduce((ret, y) => ret[y],  expect(actualValue), split('.', k))
+						if (isNotNil(expectedValue)) return taskTry(() => assert(expectedValue))
+						else return taskTry(() => assert() )
+					}
+					if (either(startsWith('rejects'), startsWith('resolves'))(k)) {
+						return check(x)
+					} else {
+						return promiseToTask(x).chain(check)
+					}
+				})
+			)
 			.chain(K(value))
+		}
 		
 		const reduceFunc = (currentValue, r) => {
-			if (typeof r === 'function') return currentValue.map(r)
+			if (typeof r === 'function') return currentValue.map(x=>x.then(r))
 			else return _assertT(r, currentValue)
 		}
 		return reduce(reduceFunc, taskOf(result), isArray(rules) ? rules : [rules])
@@ -68,17 +85,20 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 			return core.getService('initData')(init)
 			.then(() => {
 				return List(acts)
-				.series(taskOf, ([serviceName, args, ...assert]) => {
-					return runServiceT({serviceName, args})
-					.chain(assertT(assert))
-					.orElse(e => {
-						console.error(`test-case Error: ${serviceName} ${JSON.stringify(args)} ${JSON.stringify(assert)}`)
-						return taskRejected(e)
-					})
-				})
-				.orElse(x=>{
-					console.error('error: ', x)
-					return taskRejected(x)
+				.series(taskOf, (caseAct) => {
+					const [serviceName, args, ...assert] = caseAct
+					const serviceResult =  runService({serviceName, args})
+					return taskAll([
+						assertT(assert, serviceResult),
+						
+						// to test rejected promise, we have to swollen rejected promise just make sure it will run acts in order
+						promiseToTask(serviceResult.catch(K()))
+					])
+					
+					// .orElse(x=>{
+					// 	console.error(`Error happened: ${path.basename(file, '.js')} -> ${aCase.name} -> ${JSON.stringify(caseAct)}`)
+					// 	return taskRejected(x)
+					// })
 				})
 				.run().promise()
 			})
