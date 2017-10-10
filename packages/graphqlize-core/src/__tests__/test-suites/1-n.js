@@ -68,7 +68,6 @@ export default {
 			]
 		},
 		{
-			only: true,
 			name: 'create sub model ids',
 			init: {
 				Post: [

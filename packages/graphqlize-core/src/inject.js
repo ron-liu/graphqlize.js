@@ -7,7 +7,7 @@ import {
 import type {ExposeToGraphqlOption, Model} from './types'
 import {
 	findAll, create, getCreateModelName, getFindAllModelName, getUpdateModelName, update,
-	getDeleteModelName, del, getFindOneModelName, findOne
+	getDeleteModelName, del, getFindOneModelName, findOne, getUpsertModelName, upsert
 } from './resolve'
 import {getModelConnectorName} from './connector'
 
@@ -83,6 +83,15 @@ const allActions = [
 		injects: [ K('$getDb'), getModelConnectorName, K('getService') ],
 		toExposeOption: modelToCUUExposeOption(getCreateModelName),
 		func: update,
+	},
+	{
+		name: getUpsertModelName,
+		injects: [
+			pipe(prop('name'), getUpdateModelName),
+			pipe(prop('name'), getCreateModelName),
+		],
+		toExposeOption: modelToCUUExposeOption(getUpsertModelName),
+		func: upsert,
 	},
 	{
 		name: getDeleteModelName,

@@ -1,5 +1,5 @@
 import {v4} from 'uuid'
-import {prop} from '../../util'
+import {prop, map} from '../../util'
 const id1 = v4()
 export default {
 	types: [`
@@ -91,5 +91,23 @@ export default {
 				['findOnePost', {id: id1}, prop('content'), {toEqual: 'hi'}],
 			]
 		},
+		{
+			only: true,
+			name: "upsert",
+			init: {
+				Post: [
+					{id: id1, content: 'hi', likes: 2},
+				]
+			},
+			acts: [
+				['findAllPost', {}, {toHaveLength: 1}],
+				['upsertPost', {input: {content: 'good'}}, {}],
+				['findAllPost', {}, {toHaveLength: 2}],
+				['upsertPost', {input: {id: id1, content: 'hey'}}, {}],
+				['findAllPost', {}, {toHaveLength: 2}, map(prop('content')), {
+					toEqual: expect.arrayContaining(['hey', 'good'])
+				}],
+			]
+		}
 	]
 }

@@ -293,7 +293,7 @@ export const update =  ({models, model, relationships}) => async (
 	const modelConnector = await getModelConnector()
 	const modelRelationships = getModelRelationships(relationships, model.name)
 	const input = args.input
-	const {id, ...values} = input
+	const {id, ...fields} = input
 	
 	const upsertSubModelT = (modelName, fields) => {
 		const isToCreate = ! fields.id
@@ -324,7 +324,7 @@ export const update =  ({models, model, relationships}) => async (
 	.map(reduce(merge, {}))
 	
 	// itself
-	const updateModel = fields => modelConnector.updateT(fields, {where: {id}})
+	const updateModel = x => modelConnector.updateT(x, {where: {id}})
 		.chain(() => modelConnector.findOneT({where: {id}}))
 	
 	// 1-n
@@ -370,7 +370,7 @@ export const update =  ({models, model, relationships}) => async (
 	
 	return taskDo(function * () {
 		const ids = yield updateNTo1s
-		const ret = yield updateModel({...input, ...ids})
+		const ret = yield updateModel({...fields, ...ids})
 		yield List.of(update1ToNs, update1ToNIds)
 		.traverse(taskOf, f => {
 			return f()
@@ -411,4 +411,18 @@ export const findOne = ({model}) => async (
 	
 	const modelConnector = await getModelConnector()
 	return modelConnector.findOne({where: args})
+}
+
+export const getUpsertModelName : Fn1<string, string> = pipe(capitalize, concat('upsert'))
+export const upsert = ({model}) => async (
+	{
+		[getUpdateModelName(model.name)]: update,
+		[getCreateModelName(model.name)]: create,
+	},
+	args = {}
+
+) => {
+	const {input: {id}} = args
+ 	if (id) return update(args)
+	return create(args)
 }
