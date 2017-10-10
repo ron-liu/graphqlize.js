@@ -64,7 +64,6 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 	}
 	
 	describe(path.basename(file), () => {
-		
 		beforeAll(async (done) => {
 			core = createCore()
 			core.addService('initData', initData)
@@ -94,11 +93,6 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 						// to test rejected promise, we have to swollen rejected promise just make sure it will run acts in order
 						promiseToTask(serviceResult.catch(K()))
 					])
-					
-					// .orElse(x=>{
-					// 	console.error(`Error happened: ${path.basename(file, '.js')} -> ${aCase.name} -> ${JSON.stringify(caseAct)}`)
-					// 	return taskRejected(x)
-					// })
 				})
 				.run().promise()
 			})

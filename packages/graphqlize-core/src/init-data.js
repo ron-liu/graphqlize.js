@@ -3,11 +3,12 @@
 import {injectable} from 'injectable-core'
 import {
 	isArray, K, List, Map, any, ifElse, pathEq, pipe, prop, reject, toPairs, path, reduce,
-	merge, flatten, Box, promiseToTask, taskDo, taskifyPromiseFn, taskOf, map, filter
+	merge, flatten, Box, promiseToTask, taskDo, taskifyPromiseFn, taskOf, map, filter,
+	endsWith
 } from "./util";
 import {getCreateModelName, getUpdateModelName} from "./resolve";
 import DataLoader from 'dataloader'
-import {getModelConnectorName} from "./connector";
+import {getModelConnectorName, getModelConnectorNameByModelName} from "./connector";
 import {getModelRelationships} from "./relationship";
 import {isEmpty, tap} from "ramda";
 
@@ -31,8 +32,8 @@ export default injectable({
 	)
 	const serviceLoader = new DataLoader(([name]) => Promise.resolve([getService({name})]), {batch: false})
 	const connectorLoader = new DataLoader(([modelName]) => {
-		const getModelConnector = serviceLoader.load(getModelConnectorName(modelName))
-		return [getModelConnector()]
+		return serviceLoader.load(getModelConnectorNameByModelName(modelName))
+			.then(getModelConnector => [getModelConnector()])
 	}, {batch: false})
 	
 	const createModelT = modelName => fields => {
@@ -41,8 +42,11 @@ export default injectable({
 	}
 
 	const updateModelT = modelName => fields => {
-		return promiseToTask(serviceLoader.load(getUpdateModelName(modelName))
-		.then(service => service({input: fields})))
+		
+		return promiseToTask(
+			serviceLoader.load(getUpdateModelName(modelName))
+			.then(service => service({input: fields}))
+		)
 	}
 	
 	const createModel = ({modelName, fields}) => taskDo(function * () {
@@ -57,27 +61,28 @@ export default injectable({
 		.fold(List)
 		.traverse(taskOf,
 			([name, value]) => {
-				const relationship = modelRelationships.find(pathEq(['from', 'as'], name))
+				const relationship = endsWith('Ids', name)
+					? modelRelationships.find(pathEq(['from', 'as'], name.replace('Ids', '')))
+					: modelRelationships.find(pathEq(['from', 'as'], name))
 				const getConnectorP = () => connectorLoader.load(relationship.to.model)
-				const resolveValue = ifElse(
-					x => typeof x === 'function',
+				const resolveValue = pipe(
 					ifElse(
-						K(relationship),
-						f => {
-							const ret = getConnectorP().then(connector => f(connector))
-							return promiseToTask(ret)
-						},
-						pipe(f => f(), Promise.resolve, promiseToTask)
-					),
-					taskOf
+						x => typeof x === 'function',
+						ifElse(
+							K(relationship),
+							f => {
+								const ret = getConnectorP().then(connector => f(connector))
+								return promiseToTask(ret)
+							},
+							pipe(f => f(), Promise.resolve, promiseToTask)
+						),
+						taskOf
+					)
 				)
-				if (relationship.to.multi) {
-					return List(value).traverse(taskOf, resolveValue).map(x => ({name, value: x}))
-				}
-				return resolveValue(value).map(x => ({name, value: x}))
+				return resolveValue(value).map(x => ({[name]: x}))
 			}
 		)
-		.map(reduce(merge, {}))
+		.map(reduce(merge, {id:model.id}))
 		.chain(ifElse(isEmpty, taskOf, updateModelT(modelName))))
 	})
 	return promiseToTask(db.sync({force: true}))

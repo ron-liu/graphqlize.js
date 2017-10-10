@@ -50,7 +50,6 @@ export default {
 			]
 		},
 		{
-			only: true,
 			name: 'update sub model ids',
 			init: {
 				Post: [
@@ -66,6 +65,22 @@ export default {
 			acts: [
 				['updatePost', {input: {id: postId, commentsIds: [commentId1, commentId2]}}, {}],
 				['findAllComment', {filter: {postId}}, {toHaveLength: 2}, map(prop('content')), { toEqual: expect.arrayContaining(['good', 'better'])}],
+			]
+		},
+		{
+			only: true,
+			name: 'create sub model ids',
+			init: {
+				Post: [
+					{id: postId, title: 'holiday', commentsIds: () => [commentId1, commentId2]},
+				],
+				Comment: [
+					{content: 'best', id: commentId1},
+					{content: 'better', id: commentId2}
+				]
+			},
+			acts: [
+				['findAllComment', {filter: {postId}}, {toHaveLength: 2}, map(prop('content')), { toEqual: expect.arrayContaining(['best', 'better'])}],
 			]
 		}
 	]
