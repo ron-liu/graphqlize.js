@@ -2,11 +2,11 @@ import type {GraphqlizeOption, Schema, Model, Field, GenModelInputOption, Action
 import type {Fn1, Fn2, Fn3, CurriedFn2} from 'basic-types'
 import {
 	flatten, mergeWith, over, concat, lensProp, Box, prop, map, when, K, pipe, __, either, capitalize, join, tap,
-	propEq, ifElse, filter, contains, propSatisfies, I, values,List
+	propEq, ifElse, filter, contains, propSatisfies, I, values,List, keys
 } from "./util"
 // import {List} from 'immutable-ext'
 import {FIELD_KIND, TYPE_KIND} from './constants'
-import {applySpec, converge, isNil, mapObjIndexed} from "ramda";
+import {applySpec, assoc, converge, isNil, mapObjIndexed} from "ramda";
 import {joinGraphqlItems} from "./util/misc";
 import {taskTry} from "./util/hkt";
 import {propFn} from "./util/functions";
@@ -135,7 +135,7 @@ const getModelFilter : Fn1<Model, string> = model => Box(model)
 		`OR:[${getModelFilterName(model.name)}]`
 	]))
 	.map(joinGraphqlItems)
-	.fold(fields => `input ${getModelFilterName(model.name)} {${fields}`)
+	.fold(fields => `input ${getModelFilterName(model.name)} {${fields}}`)
 const genModelOrderByInput : Fn1<Model, string> = model => {
 	const name = capitalize(model.name)
 	return `input ${name}OrderByInput { column: ${name}FieldEnum, direction: OrderDirectionEnum }`
@@ -156,13 +156,18 @@ const genValueObjectModelInputs : Fn1<Model, [string]>
 	.ap(List.of(model))
 	.toArray()
 
-const isModelKind: CurriedFn2<string, Model, boolean> = propEq('modelKind')
+export const isModelKind: CurriedFn2<string, Model, boolean> = propEq('modelKind')
 
-export const genModelsInputs: Fn1<[Model], [string]>
+export const genModelsInputs: Fn1<[Model], Schema>
 = models => Box(models)
 	.map(filter(either(isModelKind(TYPE_KIND.VALUE_OBJECT), isModelKind(TYPE_KIND.PERSISTENCE))))
-	.map(map(ifElse(isModelKind(TYPE_KIND.PERSISTENCE), genPersistenceModelInputs, genValueObjectModelInputs)))
-	.fold(flatten)
+	.map(map(ifElse(
+		isModelKind(TYPE_KIND.PERSISTENCE),
+		genPersistenceModelInputs,
+		genValueObjectModelInputs
+	)))
+	.map(flatten)
+	.fold(assoc('types', __, {}))
 
 export const schemaToString: Fn1<Schema, string> = schema => taskTry(
 	() => {
@@ -181,11 +186,21 @@ export const schemaToString: Fn1<Schema, string> = schema => taskTry(
 				x => `type Mutation {\n${x}\n}`
 			),
 			converge(
-				(hasQueries, hasMutations) => `schema { ${hasQueries ? 'query:Query' : ''} ${hasMutations ? 'mutation:Mutation' : ''} }`,
+				(hasQueries, hasMutations) => (hasMutations || hasQueries)
+						? `schema { ${hasQueries ? 'query:Query' : ''} ${hasMutations ? 'mutation:Mutation' : ''} }`
+						: '',
 				[prop('queries'), prop('mutations')]
 			)
 		)
 		.ap(List.of(schema))
 		.foldMap(concat('\n\n'), '')
 	}
+)
+
+export const getScalarSchema: Fn1<GraphqlizeOption, Schema> = pipe(
+	prop('customScalars'),
+	when(isNil, K({})),
+	keys,
+	map(concat('scalar ')),
+	assoc('types', __, {})
 )

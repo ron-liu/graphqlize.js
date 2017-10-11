@@ -17,3 +17,4 @@ export const propFn = curry((name, fn, obj) => fn(prop(name, obj)))
 export const isNotNil = pipe(isNil, not)
 export const notEquals = curry( (a, b) => pipe(equals(a), not)(b) )
 export const notContains = curry( (a, b) => pipe(contains(a), not)(b) )
+export const isObject = (x: any) => typeof x === 'object'

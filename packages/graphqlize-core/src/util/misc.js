@@ -34,4 +34,4 @@ export const deCapitalize = converge(concat, [ pipe(head, toLower), tail ])
 export const joinGraphqlItems = join(', ')
 
 export const surround:CurriedFn3<string, string, string, string>
-= curry((xs, before, after) => `${before}${xs}${after}`)
+= curry((before, after, xs) => `${before}${xs}${after}`)

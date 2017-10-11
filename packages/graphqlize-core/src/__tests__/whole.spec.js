@@ -11,7 +11,7 @@ test('whole should work', async () => {
 					content: String
 				}
 				type Comment implements Saas {
-					posts: [Post!]! @relation(name: commentPost)
+					post: Post @relation(name: commentPost)
 				}
 				`]
 		},
