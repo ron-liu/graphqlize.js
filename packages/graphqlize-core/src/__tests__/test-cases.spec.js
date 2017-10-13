@@ -99,7 +99,9 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 					() => List(gqlActs)
 					.series(taskOf, (caseAct) => {
 						const [args, ...assert] = caseAct
-						const serviceResult =  graphql(executableSchema, ...args).then(prop('data'))
+						const serviceResult =  graphql(executableSchema, ...args)
+						.then(x=>x.errors ? Promise.reject(x) : x)
+						.then(prop('data'))
 						return taskAll([
 							assertT(assert, serviceResult),
 							
@@ -108,6 +110,10 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 						])
 					})
 				)
+				.orElse(x=>{
+					console.error(JSON.stringify(x))
+					return taskRejected(x)
+				})
 				.run().promise()
 			})
 		}))

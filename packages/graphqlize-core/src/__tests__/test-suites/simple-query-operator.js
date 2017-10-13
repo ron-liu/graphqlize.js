@@ -11,11 +11,10 @@ export default {
 	`],
 	cases: [
 		{
-			only: true,
 			name: 'gql query',
 			init: {
 				Post: [
-					{content: 'hi', likes: 2},
+					{id: id1, content: 'hi', likes: 2},
 					{content: 'hello', likes: 3},
 				]
 			},
@@ -31,13 +30,30 @@ export default {
 				],
 				[
 					[
+						'query Post($id:ID) {Post(id:$id) {id}}',
+						null, null,
+						{id: id1},
+					],
+					prop('Post'), {toEqual: expect.anything()}
+				]
+			]
+		},
+		{
+			name: 'gql create',
+			init: {
+				Post: [
+					{id: id1, content: 'hi', likes: 2}
+				]
+			},
+			gqlActs: [
+				[
+					[
 						'mutation createPost($input: CreatePostInput) {createPost(input: $input) {id}}',
 						null, null,
 						{input: {content: 'good day', likes: 1}}
 					],
 					{}
 				],
-				[['{allPosts {id}}'], prop('allPosts'), {toHaveLength: 3}],
 				[
 					[
 						'query posts($filter: PostFilter) {allPosts(filter:$filter) {id}}',
@@ -45,6 +61,85 @@ export default {
 						{filter: {content_like: 'good%'}}
 					],
 					prop('allPosts'), {toHaveLength: 1}
+				],
+			]
+		},
+		{
+			name: 'gql update',
+			init: {
+				Post: [
+					{id: id1, content: 'hi', likes: 2}
+				]
+			},
+			gqlActs: [
+				[
+					[
+						'mutation updatePost($input: UpdatePostInput) {updatePost(input: $input) {id}}',
+						null, null,
+						{input: {id:id1, content: 'ok', likes: 1}}
+					],
+					prop('updatePost'), {toHaveProperty: 'id'}
+				],
+				[
+					[
+						'query posts($filter: PostFilter) {allPosts(filter:$filter) {id}}',
+						null, null,
+						{filter: {content: 'ok'}}
+					],
+					prop('allPosts'), {toHaveLength: 1}
+				],
+			]
+		},
+		{
+			name: 'gql upsert',
+			init: {
+				Post: [
+					{id: id1, content: 'hi', likes: 2}
+				]
+			},
+			gqlActs: [
+				[
+					[
+						'mutation upsertPost($input: UpsertPostInput) {upsertPost(input: $input) {id}}',
+						null, null,
+						{input: {id:id1, content: 'ok', likes: 1}}
+					],
+					prop('upsertPost'), {toHaveProperty: 'id'}
+				],
+				[
+					[
+						'mutation upsertPost($input: UpsertPostInput) {upsertPost(input: $input) {id}}',
+						null, null,
+						{input: {content: 'new', likes: 2}}
+					],
+					prop('upsertPost'), {toHaveProperty: 'id'}
+				],
+				[
+					['{allPosts {id, content}}',],
+					prop('allPosts'), {toHaveLength: 2},
+					map(prop('content')), {toEqual: expect.arrayContaining(['new', 'ok'])}
+				],
+			]
+		},
+		{
+			name: 'gql delete',
+			init: {
+				Post: [
+					{id: id1, content: 'hi', likes: 2}
+				]
+			},
+			gqlActs: [
+				[
+					[
+						'mutation deletePost($id: ID) {deletePost(id: $id)}',
+						null, null,
+						{id: id1}
+					],
+					prop('deletePost'), {toEqual: 1}
+				],
+				[
+					['{allPosts {id, content}}',],
+					prop('allPosts'), {toHaveLength: 0},
 				],
 			]
 		},
@@ -113,7 +208,7 @@ export default {
 				]
 			},
 			acts: [
-				['deletePost', {input: {id: id1}}, {}],
+				['deletePost', {id: id1}, {}],
 				['findAllPost', {}, {toHaveLength: 1}]
 			]
 		},

@@ -85,7 +85,7 @@ const allActions = [
 	{
 		name: getUpdateModelName,
 		injects: [ K('$getDb'), getModelConnectorName, K('getService') ],
-		toExposeOption: modelToCUUExposeOption(getCreateModelName),
+		toExposeOption: modelToCUUExposeOption(getUpdateModelName),
 		func: update,
 	},
 	{

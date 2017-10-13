@@ -387,7 +387,7 @@ export const del = ({model}) => async (
 	args = {}
 
 ) => {
-	const {input: {id}} = args
+	const {id} = args
 	const modelConnector = await getModelConnector()
 	return modelConnector.destroy({where: {id}})
 }
