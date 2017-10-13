@@ -11,6 +11,7 @@ export default {
 	`],
 	cases: [
 		{
+			only: true,
 			name: 'gql query',
 			init: {
 				Post: [
@@ -19,7 +20,32 @@ export default {
 				]
 			},
 			gqlActs: [
-				[['{allPosts {id}}'], prop('allPosts'), {toHaveLength: 2}]
+				[['{allPosts {id}}'], prop('allPosts'), {toHaveLength: 2}],
+				[
+					[
+						'query posts($filter: PostFilter) {allPosts(filter:$filter) {id}}',
+						null, null,
+						{filter: {content_like: 'hi%'}}
+					],
+					prop('allPosts'), {toHaveLength: 1}
+				],
+				[
+					[
+						'mutation createPost($input: CreatePostInput) {createPost(input: $input) {id}}',
+						null, null,
+						{input: {content: 'good day', likes: 1}}
+					],
+					{}
+				],
+				[['{allPosts {id}}'], prop('allPosts'), {toHaveLength: 3}],
+				[
+					[
+						'query posts($filter: PostFilter) {allPosts(filter:$filter) {id}}',
+						null, null,
+						{filter: {content_like: 'good%'}}
+					],
+					prop('allPosts'), {toHaveLength: 1}
+				],
 			]
 		},
 		{
