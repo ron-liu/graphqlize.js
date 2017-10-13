@@ -11,6 +11,18 @@ export default {
 	`],
 	cases: [
 		{
+			name: 'gql query',
+			init: {
+				Post: [
+					{content: 'hi', likes: 2},
+					{content: 'hello', likes: 3},
+				]
+			},
+			gqlActs: [
+				[['{allPosts {id}}'], prop('allPosts'), {toHaveLength: 2}]
+			]
+		},
+		{
 			name: 'query',
 			init: {
 				Post: [
@@ -92,7 +104,6 @@ export default {
 			]
 		},
 		{
-			only: true,
 			name: "upsert",
 			init: {
 				Post: [

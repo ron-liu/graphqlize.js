@@ -10,6 +10,7 @@ import {promiseToTask, taskAll, taskDo, taskRejected, taskTry} from "../util/hkt
 import {either, isNil, range} from "ramda";
 import path from 'path'
 import {isArray, isNotNil} from "../util/functions";
+import {graphql} from 'graphql'
 
 const createGraphqlizeOption = (core, types) => ({
 	schema: { types},
@@ -33,7 +34,7 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 .fold(List)
 .map(suite => {
 	const {types, cases, file} = suite
-	let core
+	let core, executableSchema
 	const runService = ({serviceName, args}) => core.getService(serviceName)(args)
 	
 	const assertT = (rules, result) => {
@@ -68,7 +69,7 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 			core = createCore()
 			core.addService('initData', initData)
 			const option = createGraphqlizeOption(core, types)
-			await graphqlize(option)
+			executableSchema = await graphqlize(option)
 			done()
 		})
 		
@@ -80,7 +81,7 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 		))
 		.fold(List)
 		.forEach(aCase => it(aCase.name, async() => {
-			const {init, acts} = aCase
+			const {init, acts = [], gqlActs =[]} = aCase
 			return core.getService('initData')(init)
 			.then(() => {
 				return List(acts)
@@ -94,6 +95,19 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 						promiseToTask(serviceResult.catch(K()))
 					])
 				})
+				.chain(
+					() => List(gqlActs)
+					.series(taskOf, (caseAct) => {
+						const [args, ...assert] = caseAct
+						const serviceResult =  graphql(executableSchema, ...args).then(prop('data'))
+						return taskAll([
+							assertT(assert, serviceResult),
+							
+							// to test rejected promise, we have to swollen rejected promise just make sure it will run acts in order
+							promiseToTask(serviceResult.catch(K()))
+						])
+					})
+				)
 				.run().promise()
 			})
 		}))

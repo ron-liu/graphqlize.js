@@ -266,7 +266,8 @@ const getSchema : Fn1<{name: string, rawBizFunc: RawBizFunc}, [string]>
 	})
 }
 
-const getResolver = ({name, core, rawBizFunc}) => (_, args, context, _b) => Box(rawBizFunc)
+const getResolver = ({name, core, rawBizFunc}) => {
+	return (_, args, context, _b) => Box(rawBizFunc)
 	.map(
 		ifElse(
 			path(['injectable', 'graphql', 'input']),
@@ -276,6 +277,7 @@ const getResolver = ({name, core, rawBizFunc}) => (_, args, context, _b) => Box(
 	)
 	.map(merge(pick([PER_REQUEST_KEY_NAME], context || {}))) // 把setup-graphql-server.js文件中的{[PER_REQUEST_KEY_NAME]: req}合并
 	.fold(core.getService(name))
+}
 
 /*
 Basically there two kinds to define a mutation/query, one is args/returns and
@@ -288,7 +290,15 @@ export const extractGraphql : Fn1<Core, Fn2< string, RawBizFunc, ExtractedGraphq
 = core => (name, rawBizFunc) => {
 	return ({
 		schema: getSchema({name, rawBizFunc}),
-		resolvers: getResolver({name, rawBizFunc, core})
+		resolvers: {
+			[
+				path(['injectable','graphql', 'kind'], rawBizFunc) === 'query'
+					? 'Query'
+					: 'Mutation'
+			]: {
+				[path(['injectable', 'graphql', 'name'], rawBizFunc) || name ]:
+					getResolver({name, rawBizFunc, core})}
+			}
 	})
 }
 
@@ -300,8 +310,8 @@ const concatExtractedGraphql: CurriedFn2<ExtractedGraphql, ExtractedGraphql, Ext
 
 export const extractAllExposedServices : Fn1<Core, ExtractedGraphql>
 = core => core.reduce({
-	filter: pathSatisfies(I, [1, 'injectable', 'graphql']),
-	mapFn: converge(extractGraphql(core), [path([0]), path([1])]),
-	reducer: concatExtractedGraphql,
-	empty: {schema: {}, resolvers: {}}
-})
+		filter: pathSatisfies(I, [1, 'injectable', 'graphql']),
+		mapFn: converge(extractGraphql(core), [path([0]), path([1])]),
+		reducer: concatExtractedGraphql,
+		empty: {schema: {}, resolvers: {}}
+	})
