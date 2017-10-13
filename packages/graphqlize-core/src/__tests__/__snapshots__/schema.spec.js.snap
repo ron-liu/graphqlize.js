@@ -57,46 +57,52 @@ type Mutation {
 
 }
 
-schema {   }",
+",
 ]
 `;
 
 exports[`types to inputs inputs should ok 1`] = `
 Array [
-  Array [
-    "input CreatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
-    "input DeletePersonInput {id:ID!}",
-    "input UpdatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID!, name:String}",
-    "input UpsertPersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
-    "enum PersonFieldEnum {createdAt, updatedAt, id, name}",
-    "input PersonOrderByInput { column: PersonFieldEnum, direction: OrderDirectionEnum }",
-    "input PersonFilter {AND:[PersonFilter], OR:[PersonFilter], createdAt:DateTime, createdAt_gte:DateTime, createdAt_gt:DateTime, createdAt_lt:DateTime, createdAt_lte:DateTime, createdAt_in:[DateTime], createdAt_ne:DateTime, createdAt_between:[DateTime], createdAt_notBetween:[DateTime], createdAt_notIn:[DateTime], createdAt_like:String, createdAt_notLike:String, updatedAt:DateTime, updatedAt_gte:DateTime, updatedAt_gt:DateTime, updatedAt_lt:DateTime, updatedAt_lte:DateTime, updatedAt_in:[DateTime], updatedAt_ne:DateTime, updatedAt_between:[DateTime], updatedAt_notBetween:[DateTime], updatedAt_notIn:[DateTime], updatedAt_like:String, updatedAt_notLike:String, id:ID, name:String, name_gte:String, name_gt:String, name_lt:String, name_lte:String, name_in:[String], name_ne:String, name_between:[String], name_notBetween:[String], name_notIn:[String], name_like:String, name_notLike:String",
-  ],
-  Array [
-    "input CreatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String, histories:[CreateHistoryInput!], latestHistory:CreateHistoryInput}",
-    "input DeletePersonInput {id:ID!}",
-    "input UpdatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID!, name:String, histories:[UpsertHistoryInput!], latestHistory:UpsertHistoryInput}",
-    "input UpsertPersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String, histories:[UpsertHistoryInput!], latestHistory:UpsertHistoryInput}",
-    "enum PersonFieldEnum {createdAt, updatedAt, id, name}",
-    "input PersonOrderByInput { column: PersonFieldEnum, direction: OrderDirectionEnum }",
-    "input PersonFilter {AND:[PersonFilter], OR:[PersonFilter], createdAt:DateTime, createdAt_gte:DateTime, createdAt_gt:DateTime, createdAt_lt:DateTime, createdAt_lte:DateTime, createdAt_in:[DateTime], createdAt_ne:DateTime, createdAt_between:[DateTime], createdAt_notBetween:[DateTime], createdAt_notIn:[DateTime], createdAt_like:String, createdAt_notLike:String, updatedAt:DateTime, updatedAt_gte:DateTime, updatedAt_gt:DateTime, updatedAt_lt:DateTime, updatedAt_lte:DateTime, updatedAt_in:[DateTime], updatedAt_ne:DateTime, updatedAt_between:[DateTime], updatedAt_notBetween:[DateTime], updatedAt_notIn:[DateTime], updatedAt_like:String, updatedAt_notLike:String, id:ID, name:String, name_gte:String, name_gt:String, name_lt:String, name_lte:String, name_in:[String], name_ne:String, name_between:[String], name_notBetween:[String], name_notIn:[String], name_like:String, name_notLike:String, histories_some:HistoryFilter, histories_none:HistoryFilter, latestHistory:HistoryFilter, latestHistoryId:ID",
-    "input CreateHistoryInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
-    "input DeleteHistoryInput {id:ID!}",
-    "input UpdateHistoryInput {createdAt:DateTime, updatedAt:DateTime, id:ID!, name:String}",
-    "input UpsertHistoryInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
-    "enum HistoryFieldEnum {createdAt, updatedAt, id, name}",
-    "input HistoryOrderByInput { column: HistoryFieldEnum, direction: OrderDirectionEnum }",
-    "input HistoryFilter {AND:[HistoryFilter], OR:[HistoryFilter], createdAt:DateTime, createdAt_gte:DateTime, createdAt_gt:DateTime, createdAt_lt:DateTime, createdAt_lte:DateTime, createdAt_in:[DateTime], createdAt_ne:DateTime, createdAt_between:[DateTime], createdAt_notBetween:[DateTime], createdAt_notIn:[DateTime], createdAt_like:String, createdAt_notLike:String, updatedAt:DateTime, updatedAt_gte:DateTime, updatedAt_gt:DateTime, updatedAt_lt:DateTime, updatedAt_lte:DateTime, updatedAt_in:[DateTime], updatedAt_ne:DateTime, updatedAt_between:[DateTime], updatedAt_notBetween:[DateTime], updatedAt_notIn:[DateTime], updatedAt_like:String, updatedAt_notLike:String, id:ID, name:String, name_gte:String, name_gt:String, name_lt:String, name_lte:String, name_in:[String], name_ne:String, name_between:[String], name_notBetween:[String], name_notIn:[String], name_like:String, name_notLike:String",
-  ],
-  Array [
-    "input CreatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String, v_histories:[HistoryInput!], v_latestHistory:HistoryInput}",
-    "input DeletePersonInput {id:ID!}",
-    "input UpdatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID!, name:String, v_histories:[HistoryInput!], v_latestHistory:HistoryInput}",
-    "input UpsertPersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String, v_histories:[HistoryInput!], v_latestHistory:HistoryInput}",
-    "enum PersonFieldEnum {createdAt, updatedAt, id, name}",
-    "input PersonOrderByInput { column: PersonFieldEnum, direction: OrderDirectionEnum }",
-    "input PersonFilter {AND:[PersonFilter], OR:[PersonFilter], createdAt:DateTime, createdAt_gte:DateTime, createdAt_gt:DateTime, createdAt_lt:DateTime, createdAt_lte:DateTime, createdAt_in:[DateTime], createdAt_ne:DateTime, createdAt_between:[DateTime], createdAt_notBetween:[DateTime], createdAt_notIn:[DateTime], createdAt_like:String, createdAt_notLike:String, updatedAt:DateTime, updatedAt_gte:DateTime, updatedAt_gt:DateTime, updatedAt_lt:DateTime, updatedAt_lte:DateTime, updatedAt_in:[DateTime], updatedAt_ne:DateTime, updatedAt_between:[DateTime], updatedAt_notBetween:[DateTime], updatedAt_notIn:[DateTime], updatedAt_like:String, updatedAt_notLike:String, id:ID, name:String, name_gte:String, name_gt:String, name_lt:String, name_lte:String, name_in:[String], name_ne:String, name_between:[String], name_notBetween:[String], name_notIn:[String], name_like:String, name_notLike:String",
-    "input HistoryInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
-  ],
+  Object {
+    "types": Array [
+      "input CreatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
+      "input DeletePersonInput {id:ID!}",
+      "input UpdatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID!, name:String}",
+      "input UpsertPersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
+      "enum PersonFieldEnum {createdAt, updatedAt, id, name}",
+      "input PersonOrderByInput { column: PersonFieldEnum, direction: OrderDirectionEnum }",
+      "input PersonFilter {AND:[PersonFilter], OR:[PersonFilter], createdAt:DateTime, createdAt_gte:DateTime, createdAt_gt:DateTime, createdAt_lt:DateTime, createdAt_lte:DateTime, createdAt_in:[DateTime], createdAt_ne:DateTime, createdAt_between:[DateTime], createdAt_notBetween:[DateTime], createdAt_notIn:[DateTime], createdAt_like:String, createdAt_notLike:String, updatedAt:DateTime, updatedAt_gte:DateTime, updatedAt_gt:DateTime, updatedAt_lt:DateTime, updatedAt_lte:DateTime, updatedAt_in:[DateTime], updatedAt_ne:DateTime, updatedAt_between:[DateTime], updatedAt_notBetween:[DateTime], updatedAt_notIn:[DateTime], updatedAt_like:String, updatedAt_notLike:String, id:ID, name:String, name_gte:String, name_gt:String, name_lt:String, name_lte:String, name_in:[String], name_ne:String, name_between:[String], name_notBetween:[String], name_notIn:[String], name_like:String, name_notLike:String}",
+    ],
+  },
+  Object {
+    "types": Array [
+      "input CreatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String, histories:[CreateHistoryInput!], latestHistory:CreateHistoryInput}",
+      "input DeletePersonInput {id:ID!}",
+      "input UpdatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID!, name:String, histories:[UpsertHistoryInput!], latestHistory:UpsertHistoryInput}",
+      "input UpsertPersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String, histories:[UpsertHistoryInput!], latestHistory:UpsertHistoryInput}",
+      "enum PersonFieldEnum {createdAt, updatedAt, id, name}",
+      "input PersonOrderByInput { column: PersonFieldEnum, direction: OrderDirectionEnum }",
+      "input PersonFilter {AND:[PersonFilter], OR:[PersonFilter], createdAt:DateTime, createdAt_gte:DateTime, createdAt_gt:DateTime, createdAt_lt:DateTime, createdAt_lte:DateTime, createdAt_in:[DateTime], createdAt_ne:DateTime, createdAt_between:[DateTime], createdAt_notBetween:[DateTime], createdAt_notIn:[DateTime], createdAt_like:String, createdAt_notLike:String, updatedAt:DateTime, updatedAt_gte:DateTime, updatedAt_gt:DateTime, updatedAt_lt:DateTime, updatedAt_lte:DateTime, updatedAt_in:[DateTime], updatedAt_ne:DateTime, updatedAt_between:[DateTime], updatedAt_notBetween:[DateTime], updatedAt_notIn:[DateTime], updatedAt_like:String, updatedAt_notLike:String, id:ID, name:String, name_gte:String, name_gt:String, name_lt:String, name_lte:String, name_in:[String], name_ne:String, name_between:[String], name_notBetween:[String], name_notIn:[String], name_like:String, name_notLike:String, histories_some:HistoryFilter, histories_none:HistoryFilter, latestHistory:HistoryFilter, latestHistoryId:ID}",
+      "input CreateHistoryInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
+      "input DeleteHistoryInput {id:ID!}",
+      "input UpdateHistoryInput {createdAt:DateTime, updatedAt:DateTime, id:ID!, name:String}",
+      "input UpsertHistoryInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
+      "enum HistoryFieldEnum {createdAt, updatedAt, id, name}",
+      "input HistoryOrderByInput { column: HistoryFieldEnum, direction: OrderDirectionEnum }",
+      "input HistoryFilter {AND:[HistoryFilter], OR:[HistoryFilter], createdAt:DateTime, createdAt_gte:DateTime, createdAt_gt:DateTime, createdAt_lt:DateTime, createdAt_lte:DateTime, createdAt_in:[DateTime], createdAt_ne:DateTime, createdAt_between:[DateTime], createdAt_notBetween:[DateTime], createdAt_notIn:[DateTime], createdAt_like:String, createdAt_notLike:String, updatedAt:DateTime, updatedAt_gte:DateTime, updatedAt_gt:DateTime, updatedAt_lt:DateTime, updatedAt_lte:DateTime, updatedAt_in:[DateTime], updatedAt_ne:DateTime, updatedAt_between:[DateTime], updatedAt_notBetween:[DateTime], updatedAt_notIn:[DateTime], updatedAt_like:String, updatedAt_notLike:String, id:ID, name:String, name_gte:String, name_gt:String, name_lt:String, name_lte:String, name_in:[String], name_ne:String, name_between:[String], name_notBetween:[String], name_notIn:[String], name_like:String, name_notLike:String}",
+    ],
+  },
+  Object {
+    "types": Array [
+      "input CreatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String, v_histories:[HistoryInput!], v_latestHistory:HistoryInput}",
+      "input DeletePersonInput {id:ID!}",
+      "input UpdatePersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID!, name:String, v_histories:[HistoryInput!], v_latestHistory:HistoryInput}",
+      "input UpsertPersonInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String, v_histories:[HistoryInput!], v_latestHistory:HistoryInput}",
+      "enum PersonFieldEnum {createdAt, updatedAt, id, name}",
+      "input PersonOrderByInput { column: PersonFieldEnum, direction: OrderDirectionEnum }",
+      "input PersonFilter {AND:[PersonFilter], OR:[PersonFilter], createdAt:DateTime, createdAt_gte:DateTime, createdAt_gt:DateTime, createdAt_lt:DateTime, createdAt_lte:DateTime, createdAt_in:[DateTime], createdAt_ne:DateTime, createdAt_between:[DateTime], createdAt_notBetween:[DateTime], createdAt_notIn:[DateTime], createdAt_like:String, createdAt_notLike:String, updatedAt:DateTime, updatedAt_gte:DateTime, updatedAt_gt:DateTime, updatedAt_lt:DateTime, updatedAt_lte:DateTime, updatedAt_in:[DateTime], updatedAt_ne:DateTime, updatedAt_between:[DateTime], updatedAt_notBetween:[DateTime], updatedAt_notIn:[DateTime], updatedAt_like:String, updatedAt_notLike:String, id:ID, name:String, name_gte:String, name_gt:String, name_lt:String, name_lte:String, name_in:[String], name_ne:String, name_between:[String], name_notBetween:[String], name_notIn:[String], name_like:String, name_notLike:String}",
+      "input HistoryInput {createdAt:DateTime, updatedAt:DateTime, id:ID, name:String}",
+    ],
+  },
 ]
 `;
