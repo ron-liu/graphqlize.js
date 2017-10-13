@@ -11,6 +11,7 @@ import {addBuiltInModelServices, extractAllExposedServices} from "./inject";
 import {genModelsInputs, getScalarSchema, schemaToString} from "./schema";
 import {mergeWith} from "ramda";
 import { makeExecutableSchema } from 'graphql-tools'
+import {createRelationResolvers} from "./resolve";
 
 export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
 	const {core} = option
@@ -42,7 +43,8 @@ export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
 	).reduce(mergeWith(concat), {})
 	const resolvers = List.of(
 		serviceResolvers,
-		mapObjIndexed(prop('resolver'), validatedOption.customerScalars)
+		mapObjIndexed(prop('resolver'), validatedOption.customerScalars),
+		createRelationResolvers({relationships, models, core})
 	).reduce(merge, {})
 	return taskOf(makeExecutableSchema({
 		typeDefs: yield schemaToString(schema),

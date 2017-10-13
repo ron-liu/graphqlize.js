@@ -1,4 +1,4 @@
-import {map, prop} from '../../util'
+import {map, prop, head} from '../../util'
 import {v4} from 'uuid'
 const commentId1 = v4()
 const commentId2 = v4()
@@ -18,6 +18,21 @@ export default {
 		}
 	`],
 	cases: [
+		{
+			name: 'gql query via 1-n',
+			init: {
+				Post: [
+					{title: 'holiday', comments: [{content: 'good'}, {content: 'better'}]},
+				]
+			},
+			gqlActs: [
+				[
+					['{allPosts {comments {content}}}'],
+					prop('allPosts'), {toHaveLength: 1},
+					head, prop('comments'), map(prop('content')), {toEqual: expect.arrayContaining(['good', 'better'])}
+				]
+			]
+		},
 		{
 			name: 'query via 1-n',
 			init: {

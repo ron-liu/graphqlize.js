@@ -3,15 +3,16 @@ import {
 	promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
 	__, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
 	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter, merge,
-	List, either, both, reject
+	List, either, both, reject, applySpec, converge, fromPairs, isEmpty, pair, pathEq, pathSatisfies, propEq, tap,
+	capitalize, taskTry, pick
 } from "./util"
 import {basicQueryOperators, oneToNQueryOperators} from "./schema"
-import {applySpec, converge, fromPairs, isEmpty, pair, pathEq, pathSatisfies, propEq, tap} from "ramda";
-import {FIELD_KIND} from "./constants";
-import {getModelRelationships} from "./relationship";
-import {capitalize} from "./util/misc";
+import {FIELD_KIND} from "./constants"
+import {getModelRelationships} from "./relationship"
 import type {Fn1} from 'basic-types'
-import {taskTry} from "./util/hkt";
+import {PER_REQUEST_KEY_NAME} from "injectable-plugin-perrequest"
+import {lensProp, over} from "ramda";
+
 
 const rejectIfNil = errorMessage => ifElse(
 	isNil,
@@ -425,4 +426,42 @@ export const upsert = ({model}) => async (
 	const {input: {id}} = args
  	if (id) return update(args)
 	return create(args)
+}
+
+export const createRelationResolvers = ({relationships, models, core}) => {
+	return Box(models)
+	.map(map( model => {
+		const modelRelationships = getModelRelationships(relationships, model.name)
+		return ({
+				[model.name]: Box(model.fields)
+					.map(filter(propEq('fieldKind', 'relation')))
+					.map(map( x=> {
+						const modelRelationship = modelRelationships.find(pathEq(['from', 'as'], x.name))
+						const {from: {foreignKey}, to: {model: toModelName}} = modelRelationship
+						const getNTo1Field = (obj, args, context) => core.getService(`${getFindOneModelName(toModelName)}`)(
+							{
+								...pick([PER_REQUEST_KEY_NAME], context || {}),
+								id: obj[foreignKey]
+							}
+						)
+						const get1ToNField = (obj, args, context) => core.getService(`${getFindAllModelName(toModelName)}`)(
+							{
+								...pick([PER_REQUEST_KEY_NAME], context || {}),
+								...over(
+									lensProp('filter'),
+									merge({[foreignKey]: obj.id}),
+									args
+								)
+							}
+						)
+						
+						return {
+							[x.name]: x.isList ? get1ToNField : getNTo1Field
+						}
+					}))
+					.fold(reduce(merge, {}))
+			})
+		}
+	))
+	.fold(reduce(merge, {}))
 }
