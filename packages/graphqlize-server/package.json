@@ -1,0 +1,42 @@
+{
+  "name": "graphqlize-server",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.3.13",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-stage-1": "^6.24.1",
+    "graphqlize-core": "^0.0.1",
+    "injectable-core": "^0.0.4",
+    "injectable-plugin-perrequest": "^0.0.5"
+  },
+  "peerDependencies": {
+    "graphqlize-core": "^0.0.1",
+    "injectable-core": "^0.0.4",
+    "injectable-plugin-perrequest": "^0.0.5"
+  },
+  "scripts": {
+    "test": "jest",
+    "prepublish": "yarn run build",
+    "build": "babel src --ignore __tests__ --out-dir dist/ ; cp src/index.js dist/index.js.flow;"
+  },
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-1",
+      "flow"
+    ],
+    "plugins": [
+      "transform-object-rest-spread"
+    ]
+  },
+  "jest": {
+    "testMatch": [
+      "**/__tests__/*.spec.js"
+    ],
+    "testEnvironment": "node"
+  }
+}

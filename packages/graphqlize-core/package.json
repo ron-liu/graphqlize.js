@@ -1,10 +1,12 @@
 {
   "name": "graphqlize-core",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "prepublish": "yarn run build",
+    "build": "babel src --ignore __tests__ --out-dir dist/ ; cp src/index.js dist/index.js.flow;"
   },
   "author": "Ron Liu <ronliu2k@gmail.com>",
   "license": "ISC",
@@ -15,8 +17,6 @@
     "graphql-tools": "^2.3.0",
     "immutable": "^3.8.1",
     "immutable-ext": "^1.1.2",
-    "injectable-core": "^0.0.4",
-    "injectable-plugin-perrequest": "^0.0.5",
     "pluralize": "^7.0.0",
     "ramda": "^0.25.0",
     "sequelize": "^4.8.0"
@@ -29,10 +29,16 @@
     "babel-preset-stage-1": "^6.24.1",
     "fantasy-do": "^1.1.0",
     "glob": "^7.1.2",
+    "injectable-core": "^0.0.4",
+    "injectable-plugin-perrequest": "^0.0.5",
     "jest": "^21.1.0",
     "jest-babel": "^1.0.1",
     "sqlite3": "^3.1.13",
     "uuid": "latest"
+  },
+  "peerDependencies": {
+    "injectable-core": "^0.0.4",
+    "injectable-plugin-perrequest": "^0.0.5"
   },
   "babel": {
     "presets": [
@@ -45,7 +51,6 @@
     ]
   },
   "jest": {
-    "verbose": true,
     "testMatch": [
       "**/__tests__/*.spec.js"
     ],
