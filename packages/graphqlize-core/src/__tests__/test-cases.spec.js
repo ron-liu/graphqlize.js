@@ -17,7 +17,7 @@ const createGraphqlizeOption = (core, types) => ({
 	connection: {
 		option: {
 			dialect: 'sqlite',
-			storage: 'abc.sqlite3',
+			// storage: 'abc.sqlite3',
 			sync: {force: true}
 		}
 	},

@@ -3,7 +3,7 @@ import {plural} from 'pluralize'
 import {
 	List, prop, capitalize, surround, deCapitalize, K, applySpec, pipe, __, Box, taskTry, concat, I,
 	converge, fromPairs, pair, tap, merge, path, either, head, ifElse, join, mapObjIndexed, mergeWith, pathSatisfies,
-	pick, take, when, isArray, isObject, values
+	pick, take, when, isArray, isObject, values, pickBy
 } from "./util";
 import type {ExposeToGraphqlOption, Model, Schema, WholeResolvers, RawBizFunc, ExtractedGraphql} from './types'
 import {
@@ -155,7 +155,7 @@ const getTypes = ({baseName, kind}) => types => {
 		),
 		values,
 		x => `${kind} ${typeName} ${ kind === 'type'
-			? TYPE_KIND.VALUE_OBJECT
+			? `@${TYPE_KIND.VALUE_OBJECT}`
 			: ''} { ${ x.join('\n') } }`
 	)(schemaTypes)
 	
@@ -176,8 +176,8 @@ const getTypes = ({baseName, kind}) => types => {
 
 const getInputAndPayloadSchema = name => rawBizFunc => Box(rawBizFunc)
 	.map(path(['injectable', 'graphql']))
-	.fold(applySpec({
-		inputs: ifElse(
+	.map(converge(concat, [
+		ifElse(
 			pipe(prop('input'), when(isArray, head), isObject),
 			converge(
 				(startName, input) => (getTypes({baseName: `${startName}Input`, kind: 'input'})(input)),
@@ -188,7 +188,7 @@ const getInputAndPayloadSchema = name => rawBizFunc => Box(rawBizFunc)
 			),
 			K([])
 		),
-		types: ifElse(
+		ifElse(
 			pipe(prop('payload'), when(isArray, head), isObject),
 			converge(
 				(startName, payload) => (getTypes({baseName: `${startName}Payload`, kind: 'type'})(payload)),
@@ -199,7 +199,8 @@ const getInputAndPayloadSchema = name => rawBizFunc => Box(rawBizFunc)
 			),
 			K([])
 		)
-	}))
+	]))
+	.fold(x=>({types: x}))
 
 const getSchema : Fn1<{name: string, rawBizFunc: RawBizFunc}, [string]>
 =  ({name, rawBizFunc}) => {
@@ -217,7 +218,7 @@ const getSchema : Fn1<{name: string, rawBizFunc: RawBizFunc}, [string]>
 				prop('input'),
 				ifElse(
 					pipe(prop('input'), when(isArray, head), isObject),
-					pipe(getName, capitalize, concat(__, 'Input'), x => `(input: ${x})`),
+					pipe(getName(name), capitalize, concat(__, 'Input'), x => `(input: ${x})`),
 					converge((isArray, baseType) => {
 						if(isArray) return `(input: [${baseType}])`
 						else return `(input: ${baseType})`
@@ -242,7 +243,7 @@ const getSchema : Fn1<{name: string, rawBizFunc: RawBizFunc}, [string]>
 				prop('payload'),
 				ifElse(
 					pipe(prop('payload'), when(isArray, head), isObject),
-					pipe(getName, capitalize, concat(__, 'Payload')),
+					pipe(getName(name), capitalize, concat(__, 'Payload')),
 					ifElse(
 						pipe(prop('payload'), isArray),
 						pipe(prop('payload'), head, surround('[', ']')),

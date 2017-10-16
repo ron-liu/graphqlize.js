@@ -48,7 +48,6 @@ export type GraphqlizeOption = {
 	schema: Schema,
 	connection: Connection,
 	customerScalars?: CustomScalars,
-	resolvers?: WholeResolvers,
 	handlers?: Handlers,
 	core: Core,
 	connectorMiddlewares?: [string]
