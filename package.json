@@ -4,5 +4,10 @@
 	},
 	"scripts": {
 		"loc": "git ls-files | grep 'js$' | xargs wc -l"
+	},
+	"dependencies": {
+		"folktale": "^2.0.1",
+		"injectable-core": "^0.0.7",
+		"injectable-plugin-perrequest": "^0.0.7"
 	}
 }

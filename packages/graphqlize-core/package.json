@@ -13,9 +13,7 @@
   "dependencies": {
     "dataloader": "^1.3.0",
     "folktale": "^2.0.1",
-    "graphql": "^0.11.2",
-    "graphql-tools": "^2.3.0",
-    "immutable": "^3.8.1",
+    "immutable": "^3.8.2",
     "immutable-ext": "^1.1.2",
     "pluralize": "^7.0.0",
     "ramda": "^0.25.0",
@@ -29,16 +27,20 @@
     "babel-preset-stage-1": "^6.24.1",
     "fantasy-do": "^1.1.0",
     "glob": "^7.1.2",
-    "injectable-core": "^0.0.4",
-    "injectable-plugin-perrequest": "^0.0.5",
-    "jest": "^21.1.0",
+    "jest": "^21.2.1",
     "jest-babel": "^1.0.1",
     "sqlite3": "^3.1.13",
+    "injectable-core": "^0.0.7",
+    "injectable-plugin-perrequest": "^0.0.7",
+    "graphql": "^0.11.7",
+    "graphql-tools": "^2.5.1",
     "uuid": "latest"
   },
   "peerDependencies": {
-    "injectable-core": "^0.0.4",
-    "injectable-plugin-perrequest": "^0.0.5"
+    "injectable-core": "^0.0.7",
+    "injectable-plugin-perrequest": "^0.0.7",
+    "graphql": "^0.11.7",
+    "graphql-tools": "^2.5.1"
   },
   "babel": {
     "presets": [

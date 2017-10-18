@@ -13,8 +13,11 @@ type Connection = {
 }
 
 export type GraphqlServerExpressOption = {
-	port: number,
+	port?: number,
 	schemaFilePattern: string,
 	serviceFilePattern: string,
-	connection: Connection
+	graphqlPath?: string,
+	graphiqlPath?: string,
+	connection: Connection,
+	app?: mixed
 }
