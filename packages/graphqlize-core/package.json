@@ -1,6 +1,6 @@
 {
   "name": "graphqlize-core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -27,20 +27,20 @@
     "babel-preset-stage-1": "^6.24.1",
     "fantasy-do": "^1.1.0",
     "glob": "^7.1.2",
+    "graphql": "^0.11.7",
+    "graphql-tools": "^2.5.1",
+    "injectable-core": "^0.0.7",
+    "injectable-plugin-perrequest": "^0.0.7",
     "jest": "^21.2.1",
     "jest-babel": "^1.0.1",
     "sqlite3": "^3.1.13",
-    "injectable-core": "^0.0.7",
-    "injectable-plugin-perrequest": "^0.0.7",
-    "graphql": "^0.11.7",
-    "graphql-tools": "^2.5.1",
     "uuid": "latest"
   },
   "peerDependencies": {
-    "injectable-core": "^0.0.7",
-    "injectable-plugin-perrequest": "^0.0.7",
     "graphql": "^0.11.7",
-    "graphql-tools": "^2.5.1"
+    "graphql-tools": "^2.5.1",
+    "injectable-core": "^0.0.7",
+    "injectable-plugin-perrequest": "^0.0.7"
   },
   "babel": {
     "presets": [

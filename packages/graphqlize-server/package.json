@@ -1,7 +1,7 @@
 {
   "name": "graphqlize-server",
-  "version": "0.0.1",
-  "main": "index.js",
+  "version": "0.0.2",
+  "main": "dist/index.js",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.2",
@@ -21,7 +21,7 @@
     "babel-preset-flow": "^6.23.0",
     "babel-preset-stage-1": "^6.24.1",
     "graphql": "^0.11.7",
-    "graphqlize-core": "^0.0.1",
+    "graphqlize-core": "^0.0.2",
     "injectable-core": "^0.0.7",
     "injectable-plugin-perrequest": "^0.0.7",
     "jest": "^21.2.1",
@@ -30,7 +30,7 @@
     "supertest": "^3.0.0"
   },
   "peerDependencies": {
-    "graphqlize-core": "^0.0.1",
+    "graphqlize-core": "^0.0.2",
     "injectable-core": "^0.0.7",
     "injectable-plugin-perrequest": "^0.0.7"
   },
