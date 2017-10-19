@@ -35,4 +35,4 @@ export const getServer: GraphqlServerExpressOption => Express
 
 export const startServer: GraphqlServerExpressOption => void
 = option => getServer(option)
-	.then(()=>app.listen(option.port || 3000))
+	.then(app => app.listen(option.port || 3000))
