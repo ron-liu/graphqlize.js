@@ -1,7 +1,6 @@
 // @flow
 
 import type {GraphqlServerExpressOption} from './types'
-import {create} from "../../graphqlize-core/src/resolve";
 import express from 'express'
 import {graphiqlExpress, graphqlExpress } from 'graphql-server-express'
 import {PER_REQUEST_KEY_NAME} from 'injectable-plugin-perrequest'

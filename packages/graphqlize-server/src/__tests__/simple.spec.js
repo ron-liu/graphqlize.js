@@ -2,17 +2,11 @@ import {getServer} from '../'
 import request from 'supertest'
 import {path, tap} from 'ramda'
 
-let app
-beforeAll( async done => {
-	app = await getServer({
+it('with only type', async () => {
+	const app = await getServer({
 		schemaFilePattern: `${__dirname}/**/*.type.gql`,
-		serviceFilePattern: `${__dirname}/**/*.biz.js`,
 		connection: {option: {dialect: 'sqlite', sync: {force: true}}}
 	})
-	done()
-})
-
-it('type built in ', async () => {
 	await request(app).post('/graphql')
 	.send([{
 		query:`{allPosts {id title}}`
@@ -23,6 +17,12 @@ it('type built in ', async () => {
 })
 
 it('type built in ', async () => {
+	const app = await getServer({
+		schemaFilePattern: `${__dirname}/**/*.type.gql`,
+		serviceFilePattern: `${__dirname}/**/*.biz.js`,
+		connection: {option: {dialect: 'sqlite', sync: {force: true}}}
+	})
+	
 	await request(app).post('/graphql')
 	.send([{
 		query:`query getPosts($input: GetPostsInput) {getPosts(input: $input) {id title}}`,

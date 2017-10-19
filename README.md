@@ -2,7 +2,7 @@
 > This project is still under heavy development, we will give update this document in more details shortly. 
 
 Graphql is cool, but there is still a big gap between the schema and real database. 
-Yes, graphcool is even cool, it will generate the whole backend for you.
+Yes, [graphcool](http://www.graph.cool) is even cool, it will generate the whole backend for you.
 
 However, how about if you want to control your own data? 
 Then graphqlize.js is the answer. 

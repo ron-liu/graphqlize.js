@@ -33,10 +33,10 @@ const readFiles
 .chain(files=>List(files).traverse(of, readFile))
 .map(x=>x.toArray())
 
-const core = createCore()
 export const setupGraphqlize
 = option => {
 	const {serviceFilePattern, schemaFilePattern, connection} = option
+	const core = createCore()
 
 	return promiseToTask(core.batchAddServices(serviceFilePattern))
 	.chain(() => readFiles(schemaFilePattern))
