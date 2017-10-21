@@ -2,7 +2,8 @@ import Sequelize from 'sequelize'
 import { GraphqlizeOption, Connection, Db} from './types'
 import {
 	Box, pipe, props, K, curry, prop, isNil, promiseToTask, Task, map, ifElse, tap, path, taskOf, taskTry,
-	applySpec, converge, pair, fromPairs, forEach, propSatisfies, isNotNil, filter, when, assoc, notEquals
+	applySpec, converge, pair, fromPairs, forEach, propSatisfies, isNotNil, filter, when, assoc, notEquals,isObject,
+	I, merge
 } from './util'
 import {CurriedFn2, Fn1} from './basic-types'
 
@@ -40,13 +41,19 @@ const getSequelizeModelDefinitions = pipe(
 	filter(propSatisfies(notEquals('relation'), 'fieldKind')),
 	map(converge(pair, [
 		prop('name'),
-		applySpec({
-			type: prop('sequelizeType'),
-			allowNull: ifElse(prop('isList'), prop('allowNullList'), prop('allowNull')),
-			primaryKey: prop('primaryKey'),
-			unique: prop('isUnique'),
-			defaultValue: ifElse(prop('primaryKey'), K(Sequelize.UUIDV4), K(undefined))
-		}),
+		converge(merge, [
+			applySpec({
+				allowNull: ifElse(prop('isList'), prop('allowNullList'), prop('allowNull')),
+				primaryKey: prop('primaryKey'),
+				unique: prop('isUnique'),
+				defaultValue: ifElse(prop('primaryKey'), K(Sequelize.UUIDV4), K(undefined))
+			}),
+			ifElse(
+				pipe(prop('sequelizeType'), isObject),
+				prop('sequelizeType'),
+				pipe(prop('sequelizeType'), type=>({type}))
+			)
+		])
 	])),
 	fromPairs,
 )

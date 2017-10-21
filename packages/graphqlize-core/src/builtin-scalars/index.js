@@ -19,7 +19,7 @@ const builtInScalars: CustomScalars = {
 	'Date': {
 		sequelizeType: {
 			type: Sequelize.DATE,
-			get: function(name)  {
+			get(name)  {
 				const v = this.getDataValue(name)
 				return v == null ? null : new Date(v);
 			},
@@ -40,8 +40,8 @@ const builtInScalars: CustomScalars = {
 	},
 	'LngLat': {
 		sequelizeType: {
-			type: Sequelize.JSON,
-			get: function(name) {
+			type: Sequelize.JSONB,
+			get(name) {
 				const v = this.getDataValue(name)
 				if (typeof v === 'string') {
 					try {

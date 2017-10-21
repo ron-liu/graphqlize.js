@@ -42,7 +42,7 @@ export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
 	).reduce(mergeWith(concat), {})
 	const resolvers = List.of(
 		serviceResolvers,
-		mapObjIndexed(prop('resolver'), validatedOption.customerScalars),
+		mapObjIndexed(prop('resolver'), validatedOption.customScalars),
 		createRelationResolvers({relationships, models, core})
 	).reduce(merge, {})
 	return taskOf(makeExecutableSchema({

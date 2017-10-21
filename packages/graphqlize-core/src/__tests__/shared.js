@@ -12,9 +12,9 @@ import glob from 'glob'
 
 export const createSequelize = () => new Sequelize('', '', '', { dialect: 'sqlite',})
 export const getModelsFromTypes = types => taskOf(types)
-	.map(x=>({schema: {types, customerScalars: []}}))
+	.map(x=>({schema: {types, customScalars: []}}))
 	.chain(getAst)
-	.chain(x=>getModels(x, {schema: {types, customerScalars: []}}))
+	.chain(x=>getModels(x, {schema: {types, customScalars: []}}))
 	.run()
 	.promise()
 

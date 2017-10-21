@@ -47,7 +47,7 @@ type Core = mixed
 export type GraphqlizeOption = {
 	schema: Schema,
 	connection: Connection,
-	customerScalars?: CustomScalars,
+	customScalars?: CustomScalars,
 	handlers?: Handlers,
 	core: Core,
 	connectorMiddlewares?: [string]

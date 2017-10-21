@@ -6,8 +6,8 @@ import type {CurriedFn3} from "../basic-types";
 export const printJson = x => console.log(JSON.stringify(x, null, '\t'))
 
 export const SequelizeJsonType = {
-	type: Sequelize.JSON,
-	get: function(name) {
+	type: Sequelize.JSONB,
+	get(name) {
 		const v = this.getDataValue(name)
 		if (typeof v === 'string') {
 			try {
