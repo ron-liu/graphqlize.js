@@ -6,7 +6,6 @@ import {getRelationshipsFromAst} from './relationship'
 import {defineSequelize, initSequelize, registerGetDbService, sync} from './db'
 import {getModels, registerGetModelInfoService} from './model'
 import {buildAndAddGetModelConnectorsServices} from './connector'
-import {printJson} from "./util/misc";
 import {addBuiltInModelServices, extractAllExposedServices} from "./inject";
 import {genModelsInputs, getScalarSchema, schemaToString} from "./schema";
 import {mergeWith} from "ramda";
@@ -59,3 +58,5 @@ export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
 const graphqlize = option => graphqlizeT(option).run().promise()
 
 export default graphqlize
+
+export {default as initData} from './init-data'
