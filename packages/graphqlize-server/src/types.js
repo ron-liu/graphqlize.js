@@ -19,5 +19,6 @@ export type GraphqlServerExpressOption = {
 	graphqlPath?: string,
 	graphiqlPath?: string,
 	connection: Connection,
-	app?: mixed
+	app?: mixed,
+	core?: mixed
 }

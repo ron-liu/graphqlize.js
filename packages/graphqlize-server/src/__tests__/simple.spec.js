@@ -1,6 +1,7 @@
-import {getServer} from '../'
+import {getServer, setupData} from '../'
 import request from 'supertest'
 import {path, tap} from 'ramda'
+import {graphql} from 'graphql'
 
 it('with only type', async () => {
 	const app = await getServer({
@@ -32,4 +33,17 @@ it('type built in ', async () => {
 	.then(tap(x=>console.log(JSON.stringify(x.body))))
 	.then(path(['body', 0, 'data', 'getPosts']))
 	.then(x=>expect(x).toEqual([]))
+})
+
+it('setup data should work', async () => {
+	const executableSchema = await setupData(
+		{
+			schemaFilePattern: `${__dirname}/**/*.type.gql`,
+			connection: {option: {dialect: 'sqlite', sync: {force: true}}}
+		},
+		{Post: [{title: 'hello'}]}
+	)
+	
+	const {data: {allPosts}} = await graphql(executableSchema, `{allPosts {title}}`)
+	expect(allPosts).toHaveLength(1)
 })

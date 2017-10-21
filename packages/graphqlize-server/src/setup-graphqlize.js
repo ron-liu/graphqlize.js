@@ -35,8 +35,7 @@ const readFiles
 
 export const setupGraphqlize
 = option => {
-	const {serviceFilePattern, schemaFilePattern, connection} = option
-	const core = createCore()
+	const {serviceFilePattern, schemaFilePattern, connection, core = createCore()} = option
 
 	return promiseToTask(core.batchAddServices(serviceFilePattern))
 	.chain(() => readFiles(schemaFilePattern))

@@ -8,6 +8,8 @@ import {setupGraphqlize} from './setup-graphqlize'
 import {tap, when} from "ramda";
 import bodyParser from 'body-parser'
 import cors from 'cors'
+import {createCore} from 'injectable-core'
+import {initData} from "graphqlize-core";
 
 
 export const getServer: GraphqlServerExpressOption => Express
@@ -37,4 +39,13 @@ export const startServer: GraphqlServerExpressOption => void
 = option => getServer(option)
 	.then(app => app.listen(option.port || 3000))
 
-export {setupGraphqlize}
+export const setupInitData = async (option, data) => {
+	const core = createCore()
+	core.addService('initData', initData)
+	
+	const executableSchema = await setupGraphqlize({core, ...option})
+	const $initData = core.getService('initData')
+	await $initData(data)
+	
+	return executableSchema
+}
