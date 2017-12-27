@@ -7,7 +7,6 @@ import {readFile as _readFile} from 'fs'
 import {prop, pipe, applySpec, identity, always, tap} from 'ramda'
 import {List} from 'immutable-ext'
 import {promiseToTask} from './util'
-import {makeExecutableSchema} from "graphql-tools";
 
 type Pattern = {
 	pattern: string,

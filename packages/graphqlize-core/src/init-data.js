@@ -63,7 +63,7 @@ export default injectable({
 			([name, value]) => {
 				const relationship = endsWith('Ids', name)
 					? modelRelationships.find(pathEq(['from', 'as'], name.replace('Ids', '')))
-					: modelRelationships.find(pathEq(['from', 'as'], name))
+					: modelRelationships.find(pathEq(['from', 'as'], name.replace('Id', '')))
 				const getConnectorP = () => connectorLoader.load(relationship.to.model)
 				const resolveValue = pipe(
 					ifElse(

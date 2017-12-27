@@ -14,7 +14,6 @@ export default {
 	
 	cases: [
 		{
-			only: true,
 			name: 'json should work',
 			init: {
 				Post: [
