@@ -406,7 +406,7 @@ export const findOne = ({model}) => async (
 	.map(map(prop('name')))
 	.fold(reject(pipe(prop(__, args), isNil)))
 	
-	if (keys(args).length !== 1 || names.length !== 1) {
+	if (names.length !== 1) {
 		return Promise.reject(`One and Only one id or isUnique field is allowed`)
 	}
 	
@@ -440,13 +440,13 @@ export const createRelationResolvers = ({relationships, models, core}) => {
 						const {from: {foreignKey}, to: {model: toModelName}} = modelRelationship
 						const getNTo1Field = (obj, args, context) => core.getService(`${getFindOneModelName(toModelName)}`)(
 							{
-								...pick([PER_REQUEST_KEY_NAME], context || {}),
+								// ...pick([PER_REQUEST_KEY_NAME], context || {}), //todo: thinking adding back
 								id: obj[foreignKey]
 							}
 						)
 						const get1ToNField = (obj, args, context) => core.getService(`${getFindAllModelName(toModelName)}`)(
 							{
-								...pick([PER_REQUEST_KEY_NAME], context || {}),
+								// ...pick([PER_REQUEST_KEY_NAME], context || {}), //todo: thinking adding back
 								...over(
 									lensProp('filter'),
 									merge({[foreignKey]: obj.id}),

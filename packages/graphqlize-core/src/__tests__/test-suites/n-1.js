@@ -2,20 +2,22 @@ import {tap, head, prop} from '../../util'
 import {v4} from 'uuid'
 const commentId = v4()
 const postId1 = v4()
+const postId2 = v4()
 
 export default {
 	types: [`
 		type Post {
-			id: ID
+			id: ID!
 			title: String
 		}
 		type Comment {
-			id: ID
+			id: ID!
 			content: String
-			post: Post @relation(name:"commentPost")
+			post: Post! @relation(name:"commentPost")
 		}
 	`],
 	cases: [
+  
 		{
 			name: 'gql query parent',
 			init: {
