@@ -10,7 +10,6 @@ export default {
 	`],
   cases: [
     {
-      only: true,
       name: 'gql query',
       init: {
         Post: [

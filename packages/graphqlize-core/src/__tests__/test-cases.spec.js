@@ -80,7 +80,7 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 			I
 		))
 		.fold(List)
-		.forEach(aCase => it(aCase.name, async() => {
+		.forEach(aCase => it(aCase.name, async () => {
 			const {init, acts = [], gqlActs =[]} = aCase
 			return core.getService('initData')(init)
 			.then(() => {
@@ -110,11 +110,8 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 						])
 					})
 				)
-				.orElse(x=>{
-					console.error(JSON.stringify(x))
-					return taskRejected(x)
-				})
-				.run().promise()
+				.run()
+        .promise()
 			})
 		}))
 	})

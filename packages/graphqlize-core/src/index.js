@@ -1,5 +1,5 @@
 import type {Graphqlize} from './types'
-import {taskDo, taskAll, taskOf, taskRejected, concat, List, prop, mapObjIndexed, merge} from './util'
+import {taskDo, taskAll, taskOf, taskRejected, concat, List, prop, mapObjIndexed, merge, taskTry} from './util'
 import {getOption} from './option'
 import {getAst} from './ast'
 import {getRelationshipsFromAst} from './relationship'
@@ -46,13 +46,14 @@ export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
 		mapObjIndexed(prop('resolver'), validatedOption.customScalars),
 		createRelationResolvers({relationships, models, core})
 	).reduce(merge, {})
-	return taskOf(makeExecutableSchema({
-		typeDefs: yield schemaToString(schema),
+  const schemaString = yield schemaToString(schema)
+	return taskTry(() => makeExecutableSchema({
+		typeDefs: schemaString,
 		resolvers
 	}))
 })
 .orElse(x=>{
-	console.log('error caught:', x)
+	console.error('error caught:', x)
 	return taskRejected(x)
 })
 

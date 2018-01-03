@@ -87,6 +87,10 @@ export const getModels = (ast, option) => taskTry(() => {
 		if (field.isList) return Sequelize.JSONB
 		if (field.fieldKind === FIELD_KIND.ENUM) return Sequelize.STRING
 		if (field.fieldKind === FIELD_KIND.VALUE_OBJECT) return Sequelize.JSONB
+    
+    //todo: should avoid throw exception here
+    if (!customScalars[field.graphqlType]) throw new Error(`Field type "${field.graphqlType}" is invalid.`)
+    
 		return customScalars[field.graphqlType].sequelizeType
 	}
 	
