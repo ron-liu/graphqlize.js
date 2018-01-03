@@ -7,7 +7,7 @@ import {defineSequelize, initSequelize, registerGetDbService, sync} from './db'
 import {getModels, registerGetModelInfoService} from './model'
 import {buildAndAddGetModelConnectorsServices} from './connector'
 import {addBuiltInModelServices, extractAllExposedServices} from "./inject";
-import {genModelsInputs, getScalarSchema, schemaToString} from "./schema";
+import {extendSystemFields, genModelsInputs, getScalarSchema, schemaToString} from "./schema";
 import {mergeWith} from "ramda";
 import { makeExecutableSchema } from 'graphql-tools'
 import {createRelationResolvers} from "./resolve";
@@ -38,6 +38,7 @@ export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
 		serviceSchema,
 		genModelsInputs(models),
 		validatedOption.schema,
+    extendSystemFields(models),
 		getScalarSchema(validatedOption)
 	).reduce(mergeWith(concat), {})
 	const resolvers = List.of(

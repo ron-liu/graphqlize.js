@@ -169,6 +169,15 @@ export const genModelsInputs: Fn1<[Model], Schema>
 	.map(flatten)
 	.fold(assoc('types', __, {}))
 
+export const extendSystemFields: Fn1<[Model], Schema>
+= models => Box(models)
+  .map(filter(isModelKind(TYPE_KIND.PERSISTENCE)))
+  .map(map(({name}) => `extend type ${name} {
+    createdAt: DateTime
+    updatedAt: DateTime
+  }`))
+  .fold(assoc('types', __, {}))
+
 export const schemaToString: Fn1<Schema, string> = schema => taskTry(
 	() => {
 		const arrayToString = xs => Box(xs)

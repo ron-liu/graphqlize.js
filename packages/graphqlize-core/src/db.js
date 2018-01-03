@@ -6,6 +6,7 @@ import {
 	I, merge, propEq
 } from './util'
 import {CurriedFn2, Fn1} from './basic-types'
+import {TYPE_KIND} from "./constants";
 
 // GraphqlizeOption -> Task error db
 export const initSequelize = option => taskTry(
@@ -61,7 +62,7 @@ const getSequelizeModelDefinitions = pipe(
 const defineSequelizeModels = (db, models) => taskTry(
 	() => {
 		models
-    .filter(propEq('modelKind', 'persistence'))
+    .filter(propEq('modelKind', TYPE_KIND.PERSISTENCE))
     .forEach(
 			converge((modelName, definitions) => db.define(modelName, definitions),
 				[
