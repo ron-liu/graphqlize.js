@@ -1,5 +1,5 @@
 // @flow
-
+require('babel-polyfill')
 import type {GraphqlServerExpressOption} from './types'
 import express from 'express'
 import {graphiqlExpress, graphqlExpress } from 'graphql-server-express'

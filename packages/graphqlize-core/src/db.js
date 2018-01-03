@@ -3,7 +3,7 @@ import { GraphqlizeOption, Connection, Db} from './types'
 import {
 	Box, pipe, props, K, curry, prop, isNil, promiseToTask, Task, map, ifElse, tap, path, taskOf, taskTry,
 	applySpec, converge, pair, fromPairs, forEach, propSatisfies, isNotNil, filter, when, assoc, notEquals,isObject,
-	I, merge
+	I, merge, propEq
 } from './util'
 import {CurriedFn2, Fn1} from './basic-types'
 
@@ -60,7 +60,9 @@ const getSequelizeModelDefinitions = pipe(
 
 const defineSequelizeModels = (db, models) => taskTry(
 	() => {
-		models.forEach(
+		models
+    .filter(propEq('modelKind', 'persistence'))
+    .forEach(
 			converge((modelName, definitions) => db.define(modelName, definitions),
 				[
 					prop('name'),
