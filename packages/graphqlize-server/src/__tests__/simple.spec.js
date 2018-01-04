@@ -1,4 +1,4 @@
-import {getServer, setupData} from '../'
+import {getServer, setupInitData} from '../'
 import request from 'supertest'
 import {path, tap} from 'ramda'
 import {graphql} from 'graphql'
@@ -9,11 +9,12 @@ it('with only type', async () => {
 		connection: {option: {dialect: 'sqlite', sync: {force: true}}}
 	})
 	await request(app).post('/graphql')
-	.send([{
+	.send({
 		query:`{allPosts {id title}}`
-	}])
+	})
+  .expect(x=>console.log(3434343, x))
 	.expect(200)
-	.then(path(['body', 0, 'data', 'allPosts']))
+	.then(path(['body', 'data', 'allPosts']))
 	.then(x=>expect(x).toEqual([]))
 })
 
@@ -23,7 +24,7 @@ it('type built in ', async () => {
 		serviceFilePattern: `${__dirname}/**/*.biz.js`,
 		connection: {option: {dialect: 'sqlite', sync: {force: true}}}
 	})
-	
+
 	await request(app).post('/graphql')
 	.send([{
 		query:`query getPosts($input: GetPostsInput) {getPosts(input: $input) {id title}}`,
@@ -36,14 +37,14 @@ it('type built in ', async () => {
 })
 
 it('setup data should work', async () => {
-	const executableSchema = await setupData(
+	const executableSchema = await setupInitData(
 		{
 			schemaFilePattern: `${__dirname}/**/*.type.gql`,
 			connection: {option: {dialect: 'sqlite', sync: {force: true}}}
 		},
 		{Post: [{title: 'hello'}]}
 	)
-	
+	console.log(33333, executableSchema)
 	const {data: {allPosts}} = await graphql(executableSchema, `{allPosts {title}}`)
 	expect(allPosts).toHaveLength(1)
 })

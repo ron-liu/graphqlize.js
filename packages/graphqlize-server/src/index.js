@@ -1,4 +1,5 @@
 // @flow
+
 require('babel-polyfill')
 import type {GraphqlServerExpressOption} from './types'
 import express from 'express'
@@ -8,9 +9,8 @@ import {setupGraphqlize} from './setup-graphqlize'
 import {tap, when} from "ramda";
 import bodyParser from 'body-parser'
 import cors from 'cors'
-import {createCore} from 'injectable-core'
+import {createCore, OPTIONS_KEY} from 'injectable-core'
 import {initData} from "graphqlize-core";
-
 
 export const getServer: GraphqlServerExpressOption => Express
 = option => {
@@ -26,7 +26,7 @@ export const getServer: GraphqlServerExpressOption => Express
 	return setupGraphqlize(option)
 	.then(schema => app.use(graphqlPath, graphqlExpress(req => ({
 		schema,
-		context: {[PER_REQUEST_KEY_NAME]: req},
+		context: {[OPTIONS_KEY]: {[PER_REQUEST_KEY_NAME]: req}},
 	}))))
 	.then(when(
 		() => 'production' !== process.env.NODE_ENV,

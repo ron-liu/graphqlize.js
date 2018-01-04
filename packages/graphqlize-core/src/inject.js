@@ -12,7 +12,7 @@ import {
 } from './resolve'
 import {getModelConnectorName} from './connector'
 import {TYPE_KIND} from "./constants";
-import {PER_REQUEST_KEY_NAME} from "injectable-plugin-perrequest";
+import {OPTIONS_KEY} from 'injectable-core'
 import {isModelKind} from "./schema";
 
 const modelToFindAllExposeOption : Fn1<Model, ExposeToGraphqlOption>
@@ -276,7 +276,7 @@ const getResolver = ({name, core, rawBizFunc}) => {
 			K(args)
 		)
 	)
-	.map(merge(pick([PER_REQUEST_KEY_NAME], context || {}))) // 把setup-graphql-server.js文件中的{[PER_REQUEST_KEY_NAME]: req}合并
+	.map(merge(pick([OPTIONS_KEY], context || {})))
 	.fold(core.getService(name))
 }
 
