@@ -4,7 +4,7 @@ require('babel-polyfill')
 import type {GraphqlServerExpressOption} from './types'
 import express from 'express'
 import {graphiqlExpress, graphqlExpress } from 'graphql-server-express'
-import {PER_REQUEST_KEY_NAME} from 'injectable-plugin-perrequest'
+import perRequestPlugin, {PER_REQUEST_KEY_NAME} from 'injectable-plugin-perrequest'
 import {setupGraphqlize} from './setup-graphqlize'
 import {tap, when} from "ramda";
 import bodyParser from 'body-parser'
@@ -15,12 +15,13 @@ import {initData} from "graphqlize-core";
 export const getServer: GraphqlServerExpressOption => Express
 = option => {
 	const {
-		graphqlPath = '/graphql', graphiqlPath = '/graphiql', app = express()
+		graphqlPath = '/graphql', graphiqlPath = '/graphiql', app = express(), middlewares = []
 	} = option
 	app.use([
 		bodyParser.urlencoded({ extended: true }),
 		bodyParser.json({limit: '50mb'}),
-		cors()
+		cors(),
+    ...middlewares
 	])
 	
 	return setupGraphqlize(option)

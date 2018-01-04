@@ -4,7 +4,7 @@ import glob from 'glob'
 import {Fn1} from './basic-types'
 import {of, task} from 'folktale/concurrency/task'
 import {readFile as _readFile} from 'fs'
-import {prop, pipe, applySpec, identity, always, tap} from 'ramda'
+import {prop, pipe, applySpec, identity, always, tap, concat} from 'ramda'
 import {List} from 'immutable-ext'
 import {promiseToTask} from './util'
 
@@ -27,17 +27,20 @@ const readFile
 }))
 
 const readFiles
-= pattern => of({pattern})
-.chain(loadFiles)
-.chain(files=>List(files).traverse(of, readFile))
-.map(x=>x.toArray())
+= pattern => pattern
+  ? of({pattern})
+  .chain(loadFiles)
+  .chain(files=>List(files).traverse(of, readFile))
+  .map(x=>x.toArray())
+  : of([])
 
 export const setupGraphqlize
 = option => {
-	const {serviceFilePattern, schemaFilePattern, connection, core = createCore()} = option
+	const {serviceFilePattern, schemaFilePattern, connection, core = createCore(), schema = []} = option
 
 	return promiseToTask(core.batchAddServices(serviceFilePattern))
 	.chain(() => readFiles(schemaFilePattern))
+  .map(concat(typeof schema === 'string' ? [schema] : schema))
 	.map(applySpec({
 		schema: applySpec({types: identity}),
 		connection: always(connection),

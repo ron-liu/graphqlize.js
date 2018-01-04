@@ -16,3 +16,19 @@ export const getPosts = injectable({
 	const {likeName} = args
 	return findAllPost({filter: {likeName}})
 })
+
+export const getMyPost = injectable({
+  name: 'getMyPost',
+  injects: ['getPerRequestContext'],
+  graphql: {
+    name: 'getMyPost',
+    kind: 'query',
+    payload: 'Post'
+  }
+})((
+  {getPerRequestContext},
+  args
+) => {
+  const title = getPerRequestContext({name: 'title'})
+  return {title}
+})
