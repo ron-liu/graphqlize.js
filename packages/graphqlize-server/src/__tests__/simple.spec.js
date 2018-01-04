@@ -12,7 +12,6 @@ it('with only type', async () => {
 	.send({
 		query:`{allPosts {id title}}`
 	})
-  .expect(x=>console.log(3434343, x))
 	.expect(200)
 	.then(path(['body', 'data', 'allPosts']))
 	.then(x=>expect(x).toEqual([]))
@@ -44,7 +43,6 @@ it('setup data should work', async () => {
 		},
 		{Post: [{title: 'hello'}]}
 	)
-	console.log(33333, executableSchema)
 	const {data: {allPosts}} = await graphql(executableSchema, `{allPosts {title}}`)
 	expect(allPosts).toHaveLength(1)
 })
