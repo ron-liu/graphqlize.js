@@ -36,7 +36,7 @@ const readFiles
 
 export const setupGraphqlize
 = option => {
-	const {serviceFilePattern, schemaFilePattern, connection, core = createCore(), schema = []} = option
+	const {serviceFilePattern, schemaFilePattern, connection, core = createCore(), schema = [], connectorMiddlewares} = option
 
 	return promiseToTask(core.batchAddServices(serviceFilePattern))
 	.chain(() => readFiles(schemaFilePattern))
@@ -44,7 +44,8 @@ export const setupGraphqlize
 	.map(applySpec({
 		schema: applySpec({types: identity}),
 		connection: always(connection),
-		core: always(core)
+		core: always(core),
+    connectorMiddlewares: always(connectorMiddlewares)
 	}))
 	.chain(graphqlizeT)
 	.run()
