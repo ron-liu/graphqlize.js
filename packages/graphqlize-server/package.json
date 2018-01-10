@@ -1,6 +1,6 @@
 {
   "name": "graphqlize-server",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "main": "dist/index.js",
   "license": "MIT",
   "dependencies": {
@@ -25,12 +25,12 @@
     "graphql-tools": "^2.5.1",
     "immutable": "^3.8.2",
     "immutable-ext": "^1.1.2",
+    "injectable-core": "^0.0.13",
+    "injectable-plugin-perrequest": "^0.0.13",
     "jest": "^22.0.4",
     "jest-cli": "^22.0.4",
     "sqlite3": "^3.1.13",
-    "supertest": "^3.0.0",
-    "injectable-core": "^0.0.13",
-    "injectable-plugin-perrequest": "^0.0.13"
+    "supertest": "^3.0.0"
   },
   "peerDependencies": {
     "graphql-tools": "^2.5.1",
