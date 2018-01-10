@@ -13,8 +13,6 @@
     "graphql": "^0.11.7",
     "graphql-server-express": "^1.1.7",
     "graphqlize-core": "^0.0.18",
-    "injectable-core": "^0.0.12",
-    "injectable-plugin-perrequest": "^0.0.12",
     "ramda": "^0.25.0"
   },
   "devDependencies": {
@@ -30,12 +28,16 @@
     "jest": "^22.0.4",
     "jest-cli": "^22.0.4",
     "sqlite3": "^3.1.13",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "injectable-core": "^0.0.13",
+    "injectable-plugin-perrequest": "^0.0.13"
   },
   "peerDependencies": {
     "graphql-tools": "^2.5.1",
     "immutable": "^3.8.2",
-    "immutable-ext": "^1.1.2"
+    "immutable-ext": "^1.1.2",
+    "injectable-core": "^0.0.13",
+    "injectable-plugin-perrequest": "^0.0.13"
   },
   "scripts": {
     "test": "jest",
