@@ -22,6 +22,6 @@ export type GraphqlServerExpressOption = {
 	connection: Connection,
 	app?: mixed,
   middlewares: [Function],
-  connectorMiddlewares: [string]
+  connectorMiddlewares: [string],
 	core?: mixed
 }
