@@ -1,6 +1,6 @@
 {
   "name": "graphqlize-core",
-  "version": "0.0.18",
+  "version": "0.0.24",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
