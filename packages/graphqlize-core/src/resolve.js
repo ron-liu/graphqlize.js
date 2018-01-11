@@ -2,7 +2,7 @@ import {getModelConnectorName, getModelConnectorNameByModelName} from './connect
 import {
 	promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
 	__, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
-	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter, merge,
+	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter, merge, omit,
 	List, either, both, reject, applySpec, converge, fromPairs, isEmpty, pair, pathEq, pathSatisfies, propEq, tap,
 	capitalize, taskTry, pick
 } from "./util"
@@ -406,12 +406,12 @@ export const findOne = ({model}) => async (
 	.map(map(prop('name')))
 	.fold(reject(pipe(prop(__, args), isNil)))
 	
-	if (names.length !== 1) {
+	if (names.length !== 1 && (keys(omit([OPTIONS_KEY], args))).length !== 1) {
 		return Promise.reject(`One and Only one id or isUnique field is allowed`)
 	}
 	
 	const modelConnector = await getModelConnector()
-	return modelConnector.findOne({where: args})
+	return modelConnector.findOne({where: pick(names, args)})
 }
 
 export const getUpsertModelName : Fn1<string, string> = pipe(capitalize, concat('upsert'))
