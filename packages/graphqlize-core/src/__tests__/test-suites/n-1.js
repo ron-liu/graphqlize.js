@@ -1,6 +1,8 @@
 import {tap, head, prop} from '../../util'
 import {v4} from 'uuid'
 const commentId = v4()
+const commentId1 = v4()
+const commentId2 = v4()
 const postId1 = v4()
 const postId2 = v4()
 

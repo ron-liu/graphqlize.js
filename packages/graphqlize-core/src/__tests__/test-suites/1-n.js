@@ -18,6 +18,51 @@ export default {
 		}
 	`],
 	cases: [
+    {
+      name: 'gql create with pkids',
+      init: {
+        Comment: [
+          {id: commentId1, content: '#1'},
+          {id: commentId2, content: '#2'},
+        ]
+      },
+      gqlActs: [
+        [
+          [
+            `mutation createPost($input: CreatePostInput) {
+              createPost(input: $input) {id}
+            }`, null, null,
+            {input: {id: postId, title: 'I am coming soon', commentsIds: [commentId1, commentId2]}}
+          ]
+        ],
+        [
+          [`query allComments($filter: CommentFilter) { allComments(filter:$filter) {id} }`, null, null, {filter: {postId}} ],
+          prop('allComments'), {toHaveLength: 2}
+        ]
+      ]
+    },
+    {
+      name: 'gql create with pkid',
+      init: {
+        Post: [
+          {title: 'I am in little little dumpling restaurant', id: postId}
+        ]
+      },
+      gqlActs: [
+        [
+          [
+            `mutation createComment($input: CreateCommentInput) {
+              createComment(input: $input) {id}
+            }`, null, null,
+            {input: {postId, content: 'I am coming soon'}}
+          ]
+        ],
+        [
+          [`query allComments($filter: CommentFilter) { allComments(filter:$filter) {id} }`, null, null, {filter: {postId}} ],
+          prop('allComments'), {toHaveLength: 1}
+        ]
+      ]
+    },
 		{
 			name: 'gql query via 1-n',
 			init: {

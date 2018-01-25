@@ -1,8 +1,8 @@
 import type {GraphqlizeOption, Schema, Model, Field, GenModelInputOption, Action} from './types'
 import type {Fn1, Fn2, Fn3, CurriedFn2} from 'basic-types'
 import {
-	flatten, mergeWith, over, concat, lensProp, Box, prop, map, when, K, pipe, __, either, capitalize, join, tap,
-	propEq, ifElse, filter, contains, propSatisfies, I, values,List, keys
+  flatten, mergeWith, over, concat, lensProp, Box, prop, map, when, K, pipe, __, either, capitalize, join, tap,
+  propEq, ifElse, filter, contains, propSatisfies, I, values, List, keys, deCapitalize, evolve
 } from "./util"
 // import {List} from 'immutable-ext'
 import {FIELD_KIND, TYPE_KIND} from './constants'
@@ -30,7 +30,7 @@ const systemSchema : Schema = {
 export const mergeSystemSchema : Fn1<GraphqlizeOption, GraphqlizeOption> =
 	over(lensProp('schema'), mergeWith(concat, systemSchema))
 
-const getFieldInput : Fn1< Action, Fn1<Field, string>>
+const getFieldInputType : Fn1< Action, Fn1<Field, string>>
 = action => field => {
 	const {fieldKind, graphqlType} = field
 	if (fieldKind === FIELD_KIND.VALUE_OBJECT) return Box(graphqlType).map(capitalize).fold(concat(__, 'Input'))
@@ -44,27 +44,53 @@ const getFieldInput : Fn1< Action, Fn1<Field, string>>
 const buildInput : Fn3<Action, Model, [string], string>
 = (action, model, fields) => `input ${capitalize(action)}${model.name}Input {${joinGraphqlItems(fields)}}`
 
+const buildInputField: Fn2<GenModelInputOption, Field, Fn1<string, string>>
+= ({allowIdNull, allowFieldsOtherThanIdNull, action}, field, mapName = (x=>x)) => fieldType => {
+  const {name, isList, allowNullList, allowNull} = evolve({name: mapName}, field)
+  return pipe(
+    when(
+      either(
+        K(name !== 'id' && !allowNull),
+        K(name === 'id' && !allowIdNull)
+      ),
+      concat(__, '!')
+    ),
+    when(K(isList), pipe(concat('['), concat(__, ']'))),
+    when(K(isList && !allowNullList && !allowFieldsOtherThanIdNull), concat(__, '!')),
+    concat(`${name}:`)
+  )(fieldType)
+}
+
 const getInputField: Fn1<GenModelInputOption, Fn1<Field, string>>
-= ({allowIdNull, allowFieldsOtherThanIdNull, action}) => field => {
-	const {name, isList, allowNullList, allowNull, fieldKind, graphqlType} = field
+= (genModelInputOption) => field => {
+  const {action} = genModelInputOption
 	return Box(field)
-		.map(getFieldInput(action))
-		.map(when(
-			either(
-				K(name !== 'id' && !allowNull),
-				K(name === 'id' && !allowIdNull)
-			),
-			concat(__, '!')
-		))
-		.map(when(K(isList), pipe(concat('['), concat(__, ']'))))
-		.map(when(K(isList && !allowNullList && !allowFieldsOtherThanIdNull), concat(__, '!')))
-		.fold(concat(`${name}:`))
+		.map(getFieldInputType(action))
+		.fold(buildInputField(genModelInputOption, field))
+}
+
+const getInputFieldForRelation: Fn1<GenModelInputOption, Fn1<Field, string>>
+= (genModelInputOption) => field => {
+  const mapName = ifElse(
+    prop('isList'),
+    K(concat(__, 'Ids')),
+    K(concat(__, 'Id'))
+  )
+  return field.fieldKind === FIELD_KIND.RELATION
+    ? buildInputField(genModelInputOption, field, mapName(field))('ID')
+    : null
 }
 
 const genModelInput : Fn2<GenModelInputOption, Model, string>
 = option => model => Box(model)
 	.map(prop('fields'))
-	.map(map(getInputField(option)))
+	.map(map(
+	  x => List.of(getInputField(option), getInputFieldForRelation(option))
+    .ap(List.of(x))
+    .filterNot(isNil)
+    .toArray()
+  ))
+  .map(flatten)
 	.fold(x => buildInput(option.action, model, x))
 
 export const basicQueryOperators = {

@@ -100,7 +100,7 @@ Box(getFiles(`${__dirname}/test-suites/**/*.js`))
 					.series(taskOf, (caseAct) => {
 						const [args, ...assert] = caseAct
 						const serviceResult =  graphql(executableSchema, ...args)
-						.then(x=>x.errors ? Promise.reject(x) : x)
+						.then(x=>x.errors ? Promise.reject(x.errors[0]) : x)
 						.then(prop('data'))
 						return taskAll([
 							assertT(assert, serviceResult),
