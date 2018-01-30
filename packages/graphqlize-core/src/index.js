@@ -26,6 +26,7 @@ export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
 		getRelationshipsFromAst(ast),
 		getModels(ast, validatedOption)
 	])
+  console.log(888, relationships)
 	
 	yield taskAll([
 		registerGetModelInfoService({option: validatedOption, models, relationships}),

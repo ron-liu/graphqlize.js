@@ -8,25 +8,43 @@ const postId2 = v4()
 
 export default {
 	types: [`
-		type Post {
-			id: ID!
-			title: String
-		}
 		type Comment {
 			id: ID!
 			content: String
 			post: Post! @relation(name:"commentPost")
 		}
+		type Post {
+			id: ID!
+			title: String
+		}
 	`],
 	cases: [
-  
+    {
+      name: 'gql query with conditions',
+      init: {
+        Comment: [
+          {content: 'worries', post: {title: 'no', id: postId1}}
+        ]
+      },
+      gqlActs: [
+        [
+          [
+            `query allComments($filter: CommentFilter) {
+              allComments(filter:$filter) {id}
+            }`, null, null,
+            {filter: {postId: postId1}}
+          ],
+          prop('allComments'),
+          {toHaveLength: 1}
+        ]
+      ]
+    },
 		{
 			name: 'gql query parent',
 			init: {
 				Comment: [
 					{content: 'worries', post: {title: 'no'}}
 				]
-				
 			},
 			gqlActs: [
 				[

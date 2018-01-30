@@ -109,9 +109,15 @@ export const findAll = ({models, model, relationships}) => async (
 			))
 		const operator = Box(fieldOperator).map(split('_')).fold(last)
 		const theModelRelationships = getModelRelationships(relationships, theModel.name)
+    console.log(55454, theModelRelationships)
 		const {isList, fieldKind} = theModel.fields.find(propEq('name', fieldName))
-			|| (theModelRelationships.find(pathSatisfies(pipe(concat(__, 'Id'), equals(fieldName)), ['from', 'as']))
-				? {isList: false, fieldKind: FIELD_KIND.SCALAR} : {})
+			|| (
+			  theModelRelationships
+        .filter(path(['from', 'as']))
+        .find(pathSatisfies(pipe(concat(__, 'Id'), equals(fieldName)), ['from', 'as']))
+				? {isList: false, fieldKind: FIELD_KIND.SCALAR}
+				: {}
+				)
 		switch (fieldKind) {
 			case FIELD_KIND.ENUM:
 			case FIELD_KIND.SCALAR:
