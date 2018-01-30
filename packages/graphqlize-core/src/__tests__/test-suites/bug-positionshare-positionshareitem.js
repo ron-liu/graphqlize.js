@@ -17,7 +17,6 @@ export default {
   cases: [
     {
       name: 'bug positionshare',
-      only: true,
       init: {
         PositionShare: [
           {remark: 'remark', country: {name: 'china', id: countryId}}

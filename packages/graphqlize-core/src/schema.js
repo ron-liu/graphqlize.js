@@ -106,22 +106,30 @@ export const basicQueryOperators = {
 	like: K('String'),
 	notLike: K('String'),
 }
+const idQueryOperators = {
+	in: x => `[${x}]`,
+	ne: I,
+	notIn: x => `[${x}]`,
+}
 
 export const oneToNQueryOperators = ['some', 'none']
 
 const getModelFilterName : Fn1<string, string> = typeName => `${capitalize(typeName)}Filter`
+const buildFilterByOperators: Fn1<{name: string, graphqlType: string, operators: {[id:string]: Fn1<string, string>}}, [string]>
+= ({name, graphqlType, operators}) => Box(operators)
+  .map(pipe(
+    mapObjIndexed((getType, opName) => `${name}_${opName}:${getType(graphqlType)}`),
+    values
+  ))
+  .fold(concat([`${name}:${graphqlType}`]))
+
 const buildScalarAndEnumColumnFilter : Fn1<Field, [string]> = field => {
 	const {name, graphqlType} = field
-	return Box(basicQueryOperators)
-		.map(ifElse(
-			K(graphqlType === 'ID'),
-			K([]),
-			pipe(
-				mapObjIndexed((getType, opName) => `${name}_${opName}:${getType(graphqlType)}`),
-				values
-			)
-		))
-		.fold(concat([`${name}:${graphqlType}`]))
+	return buildFilterByOperators({
+    operators: graphqlType === 'ID' ? idQueryOperators : basicQueryOperators,
+    name,
+    graphqlType
+	})
 }
 const buildValueObjectColumnFilter: Fn1<Field, [string]> = field => []
 const buildRelationColumnFilter: Fn1<Field, [string]> = field => Box(field)
@@ -130,7 +138,7 @@ const buildRelationColumnFilter: Fn1<Field, [string]> = field => Box(field)
 		K(oneToNQueryOperators.map(x => `${field.name}_${x}:${getModelFilterName(field.graphqlType)}`)),
 		K([
 			`${field.name}:${getModelFilterName(field.graphqlType)}`,
-			`${field.name}Id:ID`
+      ...buildFilterByOperators({operators: idQueryOperators, name: `${field.name}Id`, graphqlType: 'ID'})
 		])
 	)) //todo: implements 1-n every query
 

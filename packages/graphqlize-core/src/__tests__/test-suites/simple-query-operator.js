@@ -147,11 +147,15 @@ export default {
 			name: 'query',
 			init: {
 				Post: [
-					{content: 'hi', likes: 2},
+					{content: 'hi', likes: 2, id: id1},
 					{content: 'hello', likes: 3},
 				]
 			},
 			acts: [
+				[ 'findAllPost', { filter: {id: id1} } ,  { toHaveLength: 1 } ],
+				[ 'findAllPost', { filter: {id_ne: id1} } ,  { toHaveLength: 1 } ],
+				[ 'findAllPost', { filter: {id_ne: v4()} } ,  { toHaveLength: 2 } ],
+				[ 'findAllPost', { filter: {id_in: [v4()]} } ,  { toHaveLength: 0 } ],
 				[ 'findAllPost', { filter: {content: 'hi'} } ,  { toHaveLength: 1 } ],
 				[ 'findAllPost', { filter: {content: 'nothing'} }, { toHaveLength: 0 } ],
 				[ 'findAllPost', { filter: {content_gte: 'hello'} }, { toHaveLength: 2 } ],

@@ -20,6 +20,28 @@ export default {
 	`],
 	cases: [
     {
+      name: 'gql query with fkId',
+      init: {
+        Comment: [
+          {content: 'worries', post: {title: 'no', id: postId1}},
+          {content: 'worries', post: {title: 'no', id: postId2}},
+          {content: 'worries', post: {title: 'no'}}
+        ]
+      },
+      gqlActs: [
+        [
+          [
+            `query allComments($filter: CommentFilter) {
+              allComments(filter:$filter) {id}
+            }`, null, null,
+            {filter: {postId_ne: postId1}}
+          ],
+          prop('allComments'),
+          {toHaveLength: 2}
+        ]
+      ]
+    },
+    {
       name: 'gql query with conditions',
       init: {
         Comment: [
