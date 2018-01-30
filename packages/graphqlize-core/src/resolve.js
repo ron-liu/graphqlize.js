@@ -109,7 +109,6 @@ export const findAll = ({models, model, relationships}) => async (
 			))
 		const operator = Box(fieldOperator).map(split('_')).fold(last)
 		const theModelRelationships = getModelRelationships(relationships, theModel.name)
-    console.log(55454, theModelRelationships)
 		const {isList, fieldKind} = theModel.fields.find(propEq('name', fieldName))
 			|| (
 			  theModelRelationships
