@@ -34,7 +34,6 @@ export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
 		addBuiltInModelServices({option: validatedOption, models, relationships})
 	])
 	const {schema: serviceSchema, resolvers: serviceResolvers} = extractAllExposedServices(core)
-  console.log(999,serviceSchema)
 	const schema = List.of(
 		serviceSchema,
 		genModelsInputs(models),
@@ -42,7 +41,6 @@ export const graphqlizeT : Graphqlize = (option = {}) => taskDo(function *() {
     extendSystemFields(models),
 		getScalarSchema(validatedOption)
 	).reduce(mergeWith(concat), {})
-  console.log(888,serviceSchema)
 	const resolvers = List.of(
 		serviceResolvers,
 		mapObjIndexed(prop('resolver'), validatedOption.customScalars),
