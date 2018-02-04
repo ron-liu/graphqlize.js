@@ -194,7 +194,7 @@ const getInputAndPayloadSchema = name => rawBizFunc => Box(rawBizFunc)
 				(startName, payload) => (getTypes({baseName: `${startName}Payload`, kind: 'type'})(payload)),
 				[
 					pipe(getName(name), capitalize),
-					prop('payload'),
+          pipe(prop('payload'), when(isArray, head)),
 				]
 			),
 			K([])
@@ -243,7 +243,13 @@ const getSchema : Fn1<{name: string, rawBizFunc: RawBizFunc}, [string]>
 				prop('payload'),
 				ifElse(
 					pipe(prop('payload'), when(isArray, head), isObject),
-					pipe(getName(name), capitalize, concat(__, 'Payload')),
+					pipe(
+					  ifElse(
+              pipe(prop('payload'), isArray),
+              pipe(getName(name), capitalize, concat(__, 'Payload'), surround('[', ']')),
+              pipe(getName(name), capitalize, concat(__, 'Payload')),
+            ),
+          ),
 					ifElse(
 						pipe(prop('payload'), isArray),
 						pipe(prop('payload'), head, surround('[', ']')),
