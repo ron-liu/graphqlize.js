@@ -29,7 +29,7 @@ const buildAndAddGetModelConnectorService = ({option, db, model}) => taskTry(
 			let connector = Box(db.model(model.name))
 			.fold(model => ({
 				findAll: options => model.findAll({...options}).then(map(x=>x.get())),
-				findOne: options => model.findOne({...options}).then(x=>x && x.get()),
+				findOne: options => model.findOne({...options}).then(x=> (x && x.get) ? x.get() : x),
 				destroy: options => model.destroy({...options}),
 				update: (values, option) => model.update(values, {...option}),
 				upsert: (values, option) => model.upsert(values, {...option}),

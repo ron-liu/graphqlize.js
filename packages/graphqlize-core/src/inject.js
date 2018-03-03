@@ -7,13 +7,26 @@ import {
 } from "./util";
 import type {ExposeToGraphqlOption, Model, Schema, WholeResolvers, RawBizFunc, ExtractedGraphql} from './types'
 import {
-	findAll, create, getCreateModelName, getFindAllModelName, getUpdateModelName, update,
-	getDeleteModelName, del, getFindOneModelName, findOne, getUpsertModelName, upsert
+  findAll, create, getCreateModelName, getFindAllModelName, getUpdateModelName, update,
+  getDeleteModelName, del, getFindOneModelName, findOne, getUpsertModelName, upsert, getAllModelMetaName, meta
 } from './resolve'
 import {getModelConnectorName} from './connector'
 import {TYPE_KIND} from "./constants";
 import {OPTIONS_KEY} from 'injectable-core'
 import {isModelKind} from "./schema";
+
+const modelToMetaExposeOption : Fn1<Model, ExposeToGraphqlOption>
+= pipe(
+	prop('name'),
+	applySpec({
+		name: pipe(capitalize, plural, surround('_all', 'Meta')),
+		kind: K('query'),
+		args: applySpec({
+			filter: concat(__, 'Filter')
+		}),
+		returns: () => '_QueryMeta'
+	})
+)
 
 const modelToFindAllExposeOption : Fn1<Model, ExposeToGraphqlOption>
 = pipe(
@@ -70,6 +83,12 @@ const modelToCUUExposeOption : CurriedFn2<CUU, Model, ExposeToGraphqlOption>
 }))
 
 const allActions = [
+  {
+    name: getAllModelMetaName,
+    injects: [ K('$getDb'), getModelConnectorName, K('getService') ],
+    toExposeOption: modelToMetaExposeOption,
+    func: meta
+  },
 	{
 		name: getFindAllModelName,
 		injects: [ K('$getDb'), getModelConnectorName, K('getService') ],

@@ -1,10 +1,10 @@
 import {getModelConnectorName, getModelConnectorNameByModelName} from './connector'
 import {
-	promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
-	__, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
-	curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter, merge, omit,
-	List, either, both, reject, applySpec, converge, fromPairs, isEmpty, pair, pathEq, pathSatisfies, propEq, tap,
-	capitalize, taskTry, pick
+  promiseToTask, taskRejected, isNil, when, taskOf, taskDo, Box, I, K, notContains,
+  __, assoc, ifElse, inc, init, join, last, mapObjIndexed, not, pipe, prop, range, split,
+  curry, toPairs, taskifyPromiseFn, map, path, reduce, keys, concat, equals, filter, merge, omit,
+  List, either, both, reject, applySpec, converge, fromPairs, isEmpty, pair, pathEq, pathSatisfies, propEq, tap,
+  capitalize, taskTry, pick, surround
 } from "./util"
 import {basicQueryOperators, oneToNQueryOperators} from "./schema"
 import {FIELD_KIND} from "./constants"
@@ -20,8 +20,8 @@ const rejectIfNil = errorMessage => ifElse(
 	taskOf
 )
 
-export const getFindAllModelName : Fn1<string, string> = pipe(capitalize, concat('findAll'))
-export const findAll = ({models, model, relationships}) => async (
+
+const queryAll = (kind: 'findAll' | 'meta') => ({models, model, relationships}) => async (
 	{
 		[getModelConnectorName(model)]: getModelConnector,
 		$getDb,
@@ -185,18 +185,29 @@ export const findAll = ({models, model, relationships}) => async (
 	return taskDo(function * () {
 		const cursorWhere = yield getCursorWhere(after)
 		const {where, include} = yield getWhereAndInclude(model, filter)
-		return modelConnector.findAllT({
-			where: {...cursorWhere, ...where},
-			include,
-			offset: skip,
-			limit: take,
-			order: Box(orderBy)
-				.map(map(converge(pair, [prop('column'), prop('direction')])))
-				.fold(when(K(after), concat(__, [['id', 'Asc']])))
-			
-		})
+		return kind === 'findAll'
+      ? modelConnector.findAllT({
+        where: {...cursorWhere, ...where},
+        include,
+        offset: skip,
+        limit: take,
+        order: Box(orderBy)
+          .map(map(converge(pair, [prop('column'), prop('direction')])))
+          .fold(when(K(after), concat(__, [['id', 'Asc']])))
+        
+      })
+      : modelConnector.findOneT({
+        where: {...cursorWhere, ...where},
+        raw: true,
+        attributes: [[db.fn('count',1), 'count']]
+      })
 	}).run().promise()
 }
+
+export const getFindAllModelName : Fn1<string, string> = pipe(capitalize, concat('findAll'))
+export const findAll = queryAll('findAll')
+export const getAllModelMetaName : Fn1<string, string> = pipe(capitalize, surround('_all', 'Meta'))
+export const meta = queryAll('meta')
 
 const fetchNTo1Relationships = (mRelationship, input) => taskOf(mRelationship)
 .map(filter(both(path(['from', 'as']), path(['from', 'multi']))))
