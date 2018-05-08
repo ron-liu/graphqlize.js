@@ -19,6 +19,26 @@ export default {
 	`],
 	cases: [
     {
+      name: 'no n side, should return empty array',
+      init: {
+        Comment: [
+          {content: '#1'},
+          {content: '#2'},
+        ],
+        Post: [
+          {title: 'post 1'}
+        ]
+      },
+      gqlActs: [
+        [
+          [`query allPosts { allPosts {id, comments {id content} } }` ],
+          prop('allPosts'), {toHaveLength: 1},
+          head, prop('comments'), {toHaveLength: 0}
+        ]
+      ]
+      
+    },
+    {
       name: 'gql create with pkids',
       init: {
         Comment: [

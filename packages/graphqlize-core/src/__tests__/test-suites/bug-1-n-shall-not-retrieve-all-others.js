@@ -19,7 +19,6 @@ export default {
   cases: [
     {
       name: 'should only retrieve postId #1',
-      only: true,
       init: {
         Post: [
           {id: postId1, title: '#1', comments: [{content: '#1 comment a'}, {content: '#1 comment b'}]},

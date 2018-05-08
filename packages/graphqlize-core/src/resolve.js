@@ -454,12 +454,14 @@ export const createRelationResolvers = ({relationships, models, core}) => {
 					.map(map( x=> {
 						const modelRelationship = modelRelationships.find(pathEq(['from', 'as'], x.name))
 						const {from: {foreignKey}, to: {model: toModelName}} = modelRelationship
-						const getNTo1Field = (obj, args, context) => core.getService(`${getFindOneModelName(toModelName)}`)(
-							{
-								...pick([OPTIONS_KEY], context || {} ),
-								id: obj[foreignKey]
-							}
-						)
+						const getNTo1Field = (obj, args, context) => obj[foreignKey]
+              ? core.getService(`${getFindOneModelName(toModelName)}`)(
+                  {
+                    ...pick([OPTIONS_KEY], context || {} ),
+                    id: obj[foreignKey]
+                  }
+                )
+              : null
 						const get1ToNField = (obj, args, context) => core.getService(`${getFindAllModelName(toModelName)}`)(
 							{
                 ...pick([OPTIONS_KEY], context || {} ),

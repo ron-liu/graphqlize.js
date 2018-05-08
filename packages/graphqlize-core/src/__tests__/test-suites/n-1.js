@@ -11,7 +11,7 @@ export default {
 		type Comment {
 			id: ID!
 			content: String
-			post: Post! @relation(name:"commentPost")
+			post: Post @relation(name:"commentPost")
 		}
 		type Post {
 			id: ID!
@@ -19,6 +19,31 @@ export default {
 		}
 	`],
 	cases: [
+    {
+      name: 'insert n part only, should not retrieve anything from one side',
+      init: {
+        Comment: [
+          {content: 'good'}
+        ],
+        Post: [
+          {title: 'title 1'}
+        ]
+      },
+      gqlActs: [
+        [
+          [
+            `query allComments {
+              allComments {id post {title id}}
+            }`
+          ],
+          prop('allComments'),
+          {toHaveLength: 1},
+          
+          head, prop('post'), {toBeNull: undefined}
+        ]
+      ]
+    },
+	  
     {
       name: 'gql query with fkId',
       init: {

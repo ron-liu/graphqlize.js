@@ -41,12 +41,10 @@ export const JsonScalarType = new GraphQLScalarType({
 	'[ECMA-404](http://www.ecma-international.org/' +
 	'publications/files/ECMA-ST/ECMA-404.pdf).',
 	serialize: function(value) {
-		console.log(111111, value)
 		if (typeof value === 'string') return JSON.parse(value)
 		return value
 	},
 	parseValue: function (value) {
-		console.log(222111, value)
 		if (typeof value === 'string') return JSON.parse(value)
 		return value
 	},
