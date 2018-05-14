@@ -41,8 +41,8 @@
   "peerDependencies": {
     "graphql": "^0.11.7",
     "graphql-tools": "^2.5.1",
-    "injectable-core": "^0.0.12",
-    "injectable-plugin-perrequest": "^0.0.12",
+    "injectable-core": "^0.0.18",
+    "injectable-plugin-perrequest": "^0.0.18",
     "sequelize": "^4.37.6"
   },
   "babel": {
