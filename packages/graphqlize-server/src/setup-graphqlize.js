@@ -40,14 +40,15 @@ export const setupGraphqlize
 
 	return promiseToTask(core.batchAddServices(serviceFilePattern))
 	.chain(() => readFiles(schemaFilePattern))
-  .map(concat(typeof schema === 'string' ? [schema] : schema))
+    .map(concat(typeof schema === 'string' ? [schema] : schema))
 	.map(applySpec({
 		schema: applySpec({types: identity}),
 		connection: always(connection),
 		core: always(core),
-    connectorMiddlewares: always(connectorMiddlewares)
+        connectorMiddlewares: always(connectorMiddlewares)
 	}))
 	.chain(graphqlizeT)
 	.run()
 	.promise()
+    .catch( x=> console.log(`error occurs:${JSON.stringify(x, null, '\t')}`))
 }
