@@ -23,7 +23,6 @@ const buildAndAddGetModelConnectorService = ({option, db, model}) => taskTry(
 		option: {
 			injects: [...option.connectorMiddlewares, '$getDb']
 		},
-		
 		func: async ({$getDb, ...middlewares}, _) => {
 			const db = $getDb()
 			let connector = Box(db.model(model.name))
